@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>heute.</title>
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #171717;
+    --border: #2a2a2a;
+    --text: #f0f0f0;
+    --muted: #666;
+    --accent: #fff;
+    --heart: #e74c3c;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    max-width: 900px;
+    padding: 60px 24px 24px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  .search-wrap {
+    width: 100%;
+    max-width: 900px;
+    padding: 0 24px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(var(--bg) 85%, transparent);
+    padding-top: 16px;
+  }
+
+  #search {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 15px;
+    padding: 14px 18px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search::placeholder { color: var(--muted); }
+  #search:focus { border-color: #444; }
+
+  .results-info {
+    max-width: 900px;
+    width: 100%;
+    padding: 0 24px 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .grid {
+    width: 100%;
+    max-width: 900px;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .grid.single-result {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  .card:hover { border-color: #444; transform: translateY(-2px); }
+
+  .card.spotlight {
+    animation: spotlight-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    grid-column: 1 / -1;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  @keyframes spotlight-in {
+    from { opacity: 0.4; transform: scale(0.95); }
+    to   { opacity: 1;   transform: scale(1); }
+  }
+
+  .thumb {
+    aspect-ratio: 16/9;
+    background: #111;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .thumb-label {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #2a2a2a;
+    user-select: none;
+    transition: color 0.2s;
+  }
+
+  .card:hover .thumb-label { color: #333; }
+
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card:hover .play-overlay { opacity: 1; }
+
+  .play-overlay svg {
+    width: 48px;
+    height: 48px;
+    fill: white;
+  }
+
+  .card-body {
+    padding: 14px 16px;
+  }
+
+  .card-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #222;
+    color: #999;
+    border: 1px solid #2c2c2c;
+  }
+
+  .tag.person { background: #1a1a2e; color: #8888cc; border-color: #2a2a4a; }
+  .tag.game   { background: #1a2a1a; color: #77aa77; border-color: #2a3a2a; }
+
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .modal-bg.open { display: flex; }
+
+  .modal {
+    width: 100%;
+    max-width: 960px;
+    padding: 0 20px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0 0 14px;
+  }
+
+  .modal-num { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+  .modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .heart-btn {
+    background: none;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .heart-btn:hover { border-color: var(--heart); color: var(--heart); }
+  .heart-btn.liked { border-color: var(--heart); color: var(--heart); }
+
+  .heart-icon { font-size: 16px; line-height: 1; transition: transform 0.15s; display: inline-block; }
+  .heart-btn:active .heart-icon { transform: scale(1.4); }
+
+  .close-btn {
+    background: none;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    line-height: 1;
+  }
+  .close-btn:hover { border-color: #666; color: var(--text); }
+
+  .player-wrap {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .player-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 12px;
+  }
+
+  .no-results {
+    grid-column: 1/-1;
+    text-align: center;
+    color: var(--muted);
+    padding: 60px 0;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>heute.</h1>
+</header>
+
+<div class="search-wrap">
+  <input id="search" type="text" placeholder="suche nach video, person, spiel… mehrere tags mit leerzeichen trennen" autocomplete="off" />
+</div>
+
+<div class="results-info" id="results-info"></div>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-num" id="modal-num"></div>
+        <div class="modal-title" id="modal-title"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="heart-btn" id="heart-btn" onclick="clickHeart()">
+          <span class="heart-icon">♥</span>
+          <span id="heart-count">0</span>
+        </button>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+    </div>
+    <div class="player-wrap">
+      <iframe id="player-iframe"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="modal-tags" id="modal-tags"></div>
+  </div>
+</div>
+
+<script>
+const VIDEOS = [
+  { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","XRClon"],                                          realNames:["Fabio","Xaver"],                          games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
+  { id:2,  videoId:"7BeJxzEZVz0", persons:["rquw","XRClon"],                                          realNames:["Fabio","Xaver"],                          games:["Roblox Rivals"] },
+  { id:3,  videoId:"-GqyFOPw3QU", persons:["rquw","CloudMelt","Zaykee","XRClon","Kayt"],              realNames:["Fabio","Chrisi","Niki","Xaver","Martin"],  games:["Make It Meme","Richup","Roblox Rivals","Minecraft"] },
+  { id:4,  videoId:"jJZ6pZ5v80c", persons:["rquw","CloudMelt","Zaykee","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Xaver"],           games:["Piko Park"] },
+  { id:5,  videoId:"iY3rKzpOrvc", persons:["rquw","CloudMelt","Zaykee"],                              realNames:["Fabio","Chrisi","Niki"],                   games:["Minecraft Survival","Cookee","Todoroki2009"] },
+  { id:6,  videoId:"fjtYULoGSzo", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Minecraft Survival"] },
+  { id:7,  videoId:"rTbi1m5G4ig", persons:["rquw","CloudMelt","Zaykee","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Xaver"],           games:["Minecraft Survival"] },
+  { id:8,  videoId:"QQPmDQPha2k", persons:["rquw","CloudMelt"],                                       realNames:["Fabio","Chrisi"],                          games:["Minecraft Survival"] },
+  { id:9,  videoId:"GH9lQULIt9o", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Minecraft Survival"] },
+  { id:10, videoId:"cBykPOuAwr4", persons:["rquw","CloudMelt","Zaykee","Cookeey"],                    realNames:["Fabio","Chrisi","Niki","Jaks"],            games:["Minecraft Bedwars","Minecraft Creative","Fortnite"] },
+  { id:11, videoId:"VrbcR2ZBbyA", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon","Kayt","Todoroki"], realNames:["Fabio","Chrisi","Niki","Jaks","Xaver","Martin","Nao"], games:["Fortnite","Minecraft Bedwars","Minecraft Skywars","Among Us"] },
+  { id:12, videoId:"F3VUL6C5rFY", persons:["rquw","CloudMelt","Zaykee","Todoroki"],                   realNames:["Fabio","Chrisi","Niki","Nao"],             games:["Roblox Rivals","Roblox Desert"] },
+  { id:13, videoId:"Y7DTQwOMN8A", persons:["rquw","CloudMelt","Zaykee","Cookeey","Kit"],              realNames:["Fabio","Chrisi","Niki","Jaks","Kit"],      games:["rv there yet?"] },
+  { id:14, videoId:"fwY00FFB1yc", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Rounds","Rocket League","Minecraft Survival"] },
+  { id:15, videoId:"5taV9lOyoro", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Minecraft"] },
+];
+
+let hearts = JSON.parse(localStorage.getItem('heute-hearts') || '{}');
+function saveHearts() { localStorage.setItem('heute-hearts', JSON.stringify(hearts)); }
+function getHeart(id) { return hearts[id] || 0; }
+function addHeart(id) { hearts[id] = (hearts[id] || 0) + 1; saveHearts(); }
+
+let currentVideo = null;
+
+// multi-tag: split query by spaces, every token must match
+function matchesToken(v, token) {
+  const t = token.toLowerCase();
+  if (!t) return true;
+
+  // number match: "5" or "heute5" or "heute 5"
+  const numMatch = t.match(/^(?:heute\s*)?(\d+)$/);
+  if (numMatch && parseInt(numMatch[1]) === v.id) return true;
+
+  // "heute" alone
+  if (t === 'heute') return true;
+
+  // person username or real name
+  for (let i = 0; i < v.persons.length; i++) {
+    if (v.persons[i].toLowerCase().includes(t)) return true;
+    if (v.realNames[i].toLowerCase().includes(t)) return true;
+  }
+
+  // game (partial match)
+  for (const g of v.games) {
+    if (g.toLowerCase().includes(t)) return true;
+  }
+
+  return false;
+}
+
+function matches(v, q) {
+  const tokens = q.trim().split(/\s+/).filter(Boolean);
+  if (!tokens.length) return true;
+  return tokens.every(tok => matchesToken(v, tok));
+}
+
+function buildTitle(v) {
+  return v.games.join(", ");
+}
+
+function render() {
+  const q = document.getElementById('search').value;
+  const filtered = VIDEOS.filter(v => matches(v, q));
+  const grid = document.getElementById('grid');
+  const info = document.getElementById('results-info');
+  grid.innerHTML = '';
+
+  const single = filtered.length === 1;
+  grid.className = 'grid' + (single ? ' single-result' : '');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">nichts gefunden.</div>';
+    info.textContent = '';
+    return;
+  }
+
+  if (q.trim()) {
+    info.textContent = filtered.length === VIDEOS.length
+      ? `alle ${VIDEOS.length} videos`
+      : `${filtered.length} von ${VIDEOS.length} videos`;
+  } else {
+    info.textContent = `${VIDEOS.length} videos`;
+  }
+
+  for (const v of filtered) {
+    const card = document.createElement('div');
+    card.className = 'card' + (single ? ' spotlight' : '');
+    card.onclick = () => openModal(v);
+
+    const heartCount = getHeart(v.id);
+
+    card.innerHTML = `
+      <div class="thumb">
+        <span class="thumb-label">heute ${v.id}</span>
+        <div class="play-overlay">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-num">heute ${v.id}${heartCount > 0 ? ` &nbsp;♥ ${heartCount}` : ''}</div>
+        <div class="card-title">${buildTitle(v)}</div>
+        <div class="tags">
+          ${v.persons.map((p,i) => `<span class="tag person" title="${v.realNames[i]}">${p}</span>`).join('')}
+          ${v.games.map(g => `<span class="tag game">${g}</span>`).join('')}
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  }
+}
+
+function openModal(v) {
+  currentVideo = v;
+  window._ytPaused = false;
+
+  document.getElementById('modal-num').textContent = `HEUTE ${v.id}`;
+  document.getElementById('modal-title').textContent = buildTitle(v);
+
+  const tagsEl = document.getElementById('modal-tags');
+  tagsEl.innerHTML =
+    v.persons.map((p,i) => `<span class="tag person">${p} (${v.realNames[i]})</span>`).join('') +
+    v.games.map(g => `<span class="tag game">${g}</span>`).join('');
+
+  document.getElementById('heart-count').textContent = getHeart(v.id);
+  document.getElementById('heart-btn').classList.remove('liked');
+
+  const iframe = document.getElementById('player-iframe');
+  iframe.src = `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin || 'null')}`;
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('player-iframe').src = '';
+  currentVideo = null;
+  render();
+}
+
+function clickHeart() {
+  if (!currentVideo) return;
+  addHeart(currentVideo.id);
+  document.getElementById('heart-count').textContent = getHeart(currentVideo.id);
+  const btn = document.getElementById('heart-btn');
+  btn.classList.add('liked');
+  const icon = btn.querySelector('.heart-icon');
+  icon.style.transform = 'scale(1.5)';
+  setTimeout(() => icon.style.transform = '', 150);
+}
+
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('modal');
+  const isOpen = modal.classList.contains('open');
+
+  if (e.key === 'Escape' && isOpen) { closeModal(); return; }
+  if (!isOpen) return;
+  if (document.activeElement.tagName === 'INPUT') return;
+
+  const iframe = document.getElementById('player-iframe');
+
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    if (!window._ytPaused) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      window._ytPaused = true;
+    } else {
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      window._ytPaused = false;
+    }
+  }
+
+  if (e.key === 'f' || e.key === 'F') {
+    const pw = document.querySelector('.player-wrap');
+    if (document.fullscreenElement) document.exitFullscreen();
+    else pw.requestFullscreen().catch(() => {});
+  }
+});
+
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+document.getElementById('search').addEventListener('input', render);
+
+render();
+</script>
+</body>
+</html>
