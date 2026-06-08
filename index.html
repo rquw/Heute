@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>heute.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>">
 <style>
   :root {
     --bg: #0e0e0e;
@@ -11,8 +12,8 @@
     --border: #2a2a2a;
     --text: #f0f0f0;
     --muted: #666;
-    --accent: #fff;
     --heart: #e74c3c;
+    --heart-glow: #ff6b6b;
     --radius: 10px;
   }
 
@@ -85,9 +86,7 @@
     gap: 16px;
   }
 
-  .grid.single-result {
-    grid-template-columns: 1fr;
-  }
+  .grid.single-result { grid-template-columns: 1fr; }
 
   .card {
     background: var(--surface);
@@ -147,15 +146,9 @@
   }
   .card:hover .play-overlay { opacity: 1; }
 
-  .play-overlay svg {
-    width: 48px;
-    height: 48px;
-    fill: white;
-  }
+  .play-overlay svg { width: 48px; height: 48px; fill: white; }
 
-  .card-body {
-    padding: 14px 16px;
-  }
+  .card-body { padding: 14px 16px; }
 
   .card-num {
     font-size: 11px;
@@ -174,11 +167,7 @@
     line-height: 1.3;
   }
 
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
 
   .tag {
     font-size: 11px;
@@ -192,6 +181,7 @@
   .tag.person { background: #1a1a2e; color: #8888cc; border-color: #2a2a4a; }
   .tag.game   { background: #1a2a1a; color: #77aa77; border-color: #2a3a2a; }
 
+  /* MODAL */
   .modal-bg {
     display: none;
     position: fixed;
@@ -221,32 +211,6 @@
   .modal-num { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 2px; }
 
-  .modal-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .heart-btn {
-    background: none;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 14px;
-    padding: 8px 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: border-color 0.2s, color 0.2s;
-  }
-
-  .heart-btn:hover { border-color: var(--heart); color: var(--heart); }
-  .heart-btn.liked { border-color: var(--heart); color: var(--heart); }
-
-  .heart-icon { font-size: 16px; line-height: 1; transition: transform 0.15s; display: inline-block; }
-  .heart-btn:active .heart-icon { transform: scale(1.4); }
-
   .close-btn {
     background: none;
     border: 1px solid #333;
@@ -260,7 +224,7 @@
     align-items: center;
     justify-content: center;
     transition: border-color 0.2s, color 0.2s;
-    line-height: 1;
+    flex-shrink: 0;
   }
   .close-btn:hover { border-color: #666; color: var(--text); }
 
@@ -270,7 +234,6 @@
     background: #000;
     border-radius: var(--radius);
     overflow: hidden;
-    position: relative;
   }
 
   .player-wrap iframe {
@@ -280,11 +243,106 @@
     display: block;
   }
 
-  .modal-tags {
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; }
+
+  /* BIG HEART BUTTON */
+  .heart-section {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding-top: 12px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 20px;
+    position: relative;
+  }
+
+  .heart-big-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    border: 2px solid #2a2a2a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    line-height: 1;
+    transition: border-color 0.2s, background 0.2s, transform 0.1s;
+    position: relative;
+    overflow: visible;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .heart-big-btn:hover {
+    border-color: var(--heart);
+    background: #1f1010;
+  }
+
+  .heart-big-btn:active { transform: scale(0.9); }
+
+  .heart-big-btn.pumping {
+    animation: heart-pump 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
+  @keyframes heart-pump {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.25); }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  .heart-big-btn.on-fire {
+    border-color: #ff4500;
+    background: #1f0a00;
+    box-shadow: 0 0 20px rgba(255,69,0,0.3);
+  }
+
+  .heart-big-btn.legendary {
+    border-color: #ffd700;
+    background: #1a1500;
+    box-shadow: 0 0 30px rgba(255,215,0,0.4);
+  }
+
+  .heart-count-display {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color 0.3s;
+    letter-spacing: 0.5px;
+  }
+
+  .heart-count-display.has-hearts { color: var(--heart); }
+  .heart-count-display.on-fire { color: #ff6b00; }
+  .heart-count-display.legendary { color: #ffd700; }
+
+  .combo-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    height: 16px;
+    transition: color 0.2s;
+  }
+
+  .combo-label.active { color: #ff6b00; }
+  .combo-label.legendary { color: #ffd700; }
+
+  /* floating +1 particles */
+  .floaty {
+    position: absolute;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--heart);
+    pointer-events: none;
+    animation: floaty-up 0.9s ease-out forwards;
+    white-space: nowrap;
+  }
+
+  @keyframes floaty-up {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-70px) scale(0.6); }
   }
 
   .no-results {
@@ -298,16 +356,13 @@
 </head>
 <body>
 
-<header>
-  <h1>heute.</h1>
-</header>
+<header><h1>heute.</h1></header>
 
 <div class="search-wrap">
   <input id="search" type="text" placeholder="suche nach video, person, spiel… mehrere tags mit leerzeichen trennen" autocomplete="off" />
 </div>
 
 <div class="results-info" id="results-info"></div>
-
 <div class="grid" id="grid"></div>
 
 <div class="modal-bg" id="modal">
@@ -317,73 +372,198 @@
         <div class="modal-num" id="modal-num"></div>
         <div class="modal-title" id="modal-title"></div>
       </div>
-      <div class="modal-actions">
-        <button class="heart-btn" id="heart-btn" onclick="clickHeart()">
-          <span class="heart-icon">♥</span>
-          <span id="heart-count">0</span>
-        </button>
-        <button class="close-btn" onclick="closeModal()">×</button>
-      </div>
+      <button class="close-btn" onclick="closeModal()">×</button>
     </div>
+
     <div class="player-wrap">
       <iframe id="player-iframe"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         allowfullscreen>
       </iframe>
     </div>
+
     <div class="modal-tags" id="modal-tags"></div>
+
+    <div class="heart-section">
+      <div class="combo-label" id="combo-label"></div>
+      <button class="heart-big-btn" id="heart-big-btn" onclick="clickHeart()">♥</button>
+      <div class="heart-count-display" id="heart-count-display">0</div>
+    </div>
   </div>
 </div>
 
 <script>
+const SUPABASE_URL = 'https://psqwpibpfsmaeviuiali.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzcXdwaWJwZnNtYWV2aXVpYWxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4OTEwMjYsImV4cCI6MjA5NjQ2NzAyNn0.eHUdvXFmLAKjpPlCH0mdNFBkMVX4icjAuXYC3xd5Kkw';
+
+async function sbFetch(path, opts = {}) {
+  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(opts.headers || {}),
+    },
+  });
+}
+
+// hearts cache: { videoId: count }
+let heartCache = {};
+
+async function loadAllHearts() {
+  try {
+    const r = await sbFetch('hearts?select=video_id,count');
+    if (r.ok) {
+      const data = await r.json();
+      heartCache = {};
+      for (const row of data) heartCache[row.video_id] = row.count;
+    }
+  } catch(e) {}
+}
+
+async function getHeartCount(videoId) {
+  try {
+    const r = await sbFetch(`hearts?video_id=eq.${videoId}&select=count`);
+    if (r.ok) {
+      const data = await r.json();
+      if (data.length) { heartCache[videoId] = data[0].count; return data[0].count; }
+    }
+  } catch(e) {}
+  return heartCache[videoId] || 0;
+}
+
+async function incrementHeart(videoId) {
+  try {
+    // upsert: if row exists increment, else insert with count=1
+    const r = await sbFetch('hearts', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify({ video_id: videoId, count: 1 }),
+    });
+    if (r.ok) {
+      const data = await r.json();
+      const newCount = Array.isArray(data) ? data[0]?.count : data?.count;
+      if (newCount !== undefined) { heartCache[videoId] = newCount; return newCount; }
+    }
+  } catch(e) {}
+  // fallback local
+  heartCache[videoId] = (heartCache[videoId] || 0) + 1;
+  return heartCache[videoId];
+}
+
 const VIDEOS = [
-  { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","XRClon"],                                          realNames:["Fabio","Xaver"],                          games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
-  { id:2,  videoId:"7BeJxzEZVz0", persons:["rquw","XRClon"],                                          realNames:["Fabio","Xaver"],                          games:["Roblox Rivals"] },
-  { id:3,  videoId:"-GqyFOPw3QU", persons:["rquw","CloudMelt","Zaykee","XRClon","Kayt"],              realNames:["Fabio","Chrisi","Niki","Xaver","Martin"],  games:["Make It Meme","Richup","Roblox Rivals","Minecraft"] },
-  { id:4,  videoId:"jJZ6pZ5v80c", persons:["rquw","CloudMelt","Zaykee","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Xaver"],           games:["Piko Park"] },
-  { id:5,  videoId:"iY3rKzpOrvc", persons:["rquw","CloudMelt","Zaykee"],                              realNames:["Fabio","Chrisi","Niki"],                   games:["Minecraft Survival","Cookee","Todoroki2009"] },
-  { id:6,  videoId:"fjtYULoGSzo", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Minecraft Survival"] },
-  { id:7,  videoId:"rTbi1m5G4ig", persons:["rquw","CloudMelt","Zaykee","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Xaver"],           games:["Minecraft Survival"] },
-  { id:8,  videoId:"QQPmDQPha2k", persons:["rquw","CloudMelt"],                                       realNames:["Fabio","Chrisi"],                          games:["Minecraft Survival"] },
-  { id:9,  videoId:"GH9lQULIt9o", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Minecraft Survival"] },
-  { id:10, videoId:"cBykPOuAwr4", persons:["rquw","CloudMelt","Zaykee","Cookeey"],                    realNames:["Fabio","Chrisi","Niki","Jaks"],            games:["Minecraft Bedwars","Minecraft Creative","Fortnite"] },
-  { id:11, videoId:"VrbcR2ZBbyA", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon","Kayt","Todoroki"], realNames:["Fabio","Chrisi","Niki","Jaks","Xaver","Martin","Nao"], games:["Fortnite","Minecraft Bedwars","Minecraft Skywars","Among Us"] },
-  { id:12, videoId:"F3VUL6C5rFY", persons:["rquw","CloudMelt","Zaykee","Todoroki"],                   realNames:["Fabio","Chrisi","Niki","Nao"],             games:["Roblox Rivals","Roblox Desert"] },
-  { id:13, videoId:"Y7DTQwOMN8A", persons:["rquw","CloudMelt","Zaykee","Cookeey","Kit"],              realNames:["Fabio","Chrisi","Niki","Jaks","Kit"],      games:["rv there yet?"] },
-  { id:14, videoId:"fwY00FFB1yc", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Rounds","Rocket League","Minecraft Survival"] },
-  { id:15, videoId:"5taV9lOyoro", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],           realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],    games:["Minecraft"] },
+  { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
+  { id:2,  videoId:"7BeJxzEZVz0", persons:["rquw","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Roblox Rivals"] },
+  { id:3,  videoId:"-GqyFOPw3QU", persons:["rquw","CloudMelt","Zaykee","XRClon","Kayt"],                        realNames:["Fabio","Chrisi","Niki","Xaver","Martin"],     games:["Make It Meme","Richup","Roblox Rivals","Minecraft"] },
+  { id:4,  videoId:"jJZ6pZ5v80c", persons:["rquw","CloudMelt","Zaykee","XRClon"],                               realNames:["Fabio","Chrisi","Niki","Xaver"],              games:["Piko Park"] },
+  { id:5,  videoId:"iY3rKzpOrvc", persons:["rquw","CloudMelt","Zaykee"],                                        realNames:["Fabio","Chrisi","Niki"],                      games:["Minecraft Survival","Cookee","Todoroki2009"] },
+  { id:6,  videoId:"fjtYULoGSzo", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Minecraft Survival"] },
+  { id:7,  videoId:"rTbi1m5G4ig", persons:["rquw","CloudMelt","Zaykee","XRClon"],                               realNames:["Fabio","Chrisi","Niki","Xaver"],              games:["Minecraft Survival"] },
+  { id:8,  videoId:"QQPmDQPha2k", persons:["rquw","CloudMelt"],                                                 realNames:["Fabio","Chrisi"],                             games:["Minecraft Survival"] },
+  { id:9,  videoId:"GH9lQULIt9o", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Minecraft Survival"] },
+  { id:10, videoId:"cBykPOuAwr4", persons:["rquw","CloudMelt","Zaykee","Cookeey"],                              realNames:["Fabio","Chrisi","Niki","Jaks"],               games:["Minecraft Bedwars","Minecraft Creative","Fortnite"] },
+  { id:11, videoId:"VrbcR2ZBbyA", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon","Kayt","Todoroki"],   realNames:["Fabio","Chrisi","Niki","Jaks","Xaver","Martin","Nao"], games:["Fortnite","Minecraft Bedwars","Minecraft Skywars","Among Us"] },
+  { id:12, videoId:"F3VUL6C5rFY", persons:["rquw","CloudMelt","Zaykee","Todoroki"],                             realNames:["Fabio","Chrisi","Niki","Nao"],                games:["Roblox Rivals","Roblox Desert"] },
+  { id:13, videoId:"Y7DTQwOMN8A", persons:["rquw","CloudMelt","Zaykee","Cookeey","Kit"],                        realNames:["Fabio","Chrisi","Niki","Jaks","Kit"],          games:["rv there yet?"] },
+  { id:14, videoId:"fwY00FFB1yc", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Rounds","Rocket League","Minecraft Survival"] },
+  { id:15, videoId:"5taV9lOyoro", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Minecraft"] },
 ];
 
-let hearts = JSON.parse(localStorage.getItem('heute-hearts') || '{}');
-function saveHearts() { localStorage.setItem('heute-hearts', JSON.stringify(hearts)); }
-function getHeart(id) { return hearts[id] || 0; }
-function addHeart(id) { hearts[id] = (hearts[id] || 0) + 1; saveHearts(); }
-
 let currentVideo = null;
+let comboCount = 0;
+let comboTimer = null;
 
-// multi-tag: split query by spaces, every token must match
+const COMBO_TIERS = [
+  { min: 50, label: '👑 LEGENDARY', cls: 'legendary' },
+  { min: 20, label: '🔥 ON FIRE',   cls: 'on-fire' },
+  { min: 10, label: '⚡ COMBO x',   cls: 'active', showCount: true },
+  { min: 5,  label: '× ',           cls: 'active', showCount: true },
+  { min: 2,  label: '× ',           cls: 'active', showCount: true },
+];
+
+function getTier(combo) {
+  for (const t of COMBO_TIERS) {
+    if (combo >= t.min) return t;
+  }
+  return null;
+}
+
+function spawnFloaty(btn, combo) {
+  const section = document.querySelector('.heart-section');
+  const el = document.createElement('div');
+  el.className = 'floaty';
+
+  const tier = getTier(combo);
+  if (tier && combo >= 50) el.textContent = '♥♥♥';
+  else if (tier && combo >= 20) el.textContent = '♥♥';
+  else el.textContent = '+1';
+
+  el.style.left = (btn.offsetLeft + btn.offsetWidth / 2 - 15 + (Math.random() * 30 - 15)) + 'px';
+  el.style.top  = (btn.offsetTop - 10) + 'px';
+  section.style.position = 'relative';
+  section.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+function updateHeartUI(count, combo) {
+  const btn = document.getElementById('heart-big-btn');
+  const display = document.getElementById('heart-count-display');
+  const label = document.getElementById('combo-label');
+
+  // count
+  display.textContent = count === 1 ? '1 herz' : `${count} herzen`;
+  display.className = 'heart-count-display' + (count > 0 ? (count >= 50 ? ' legendary' : count >= 20 ? ' on-fire' : ' has-hearts') : '');
+
+  // btn state
+  btn.className = 'heart-big-btn' + (count >= 50 ? ' legendary' : count >= 20 ? ' on-fire' : '');
+
+  // combo label
+  const tier = getTier(combo);
+  if (tier && combo >= 2) {
+    label.className = 'combo-label ' + tier.cls;
+    label.textContent = tier.showCount ? tier.label + combo : tier.label;
+  } else {
+    label.className = 'combo-label';
+    label.textContent = '';
+  }
+
+  // pump animation
+  btn.classList.remove('pumping');
+  void btn.offsetWidth;
+  btn.classList.add('pumping');
+  setTimeout(() => btn.classList.remove('pumping'), 300);
+}
+
+async function clickHeart() {
+  if (!currentVideo) return;
+
+  comboCount++;
+  clearTimeout(comboTimer);
+  comboTimer = setTimeout(() => { comboCount = 0; }, 1500);
+
+  const newCount = await incrementHeart(currentVideo.id);
+  spawnFloaty(document.getElementById('heart-big-btn'), comboCount);
+  updateHeartUI(newCount, comboCount);
+
+  // refresh card
+  renderCards(document.getElementById('search').value);
+}
+
 function matchesToken(v, token) {
   const t = token.toLowerCase();
   if (!t) return true;
-
-  // number match: "5" or "heute5" or "heute 5"
   const numMatch = t.match(/^(?:heute\s*)?(\d+)$/);
   if (numMatch && parseInt(numMatch[1]) === v.id) return true;
-
-  // "heute" alone
   if (t === 'heute') return true;
-
-  // person username or real name
   for (let i = 0; i < v.persons.length; i++) {
     if (v.persons[i].toLowerCase().includes(t)) return true;
     if (v.realNames[i].toLowerCase().includes(t)) return true;
   }
-
-  // game (partial match)
   for (const g of v.games) {
     if (g.toLowerCase().includes(t)) return true;
   }
-
   return false;
 }
 
@@ -393,12 +573,9 @@ function matches(v, q) {
   return tokens.every(tok => matchesToken(v, tok));
 }
 
-function buildTitle(v) {
-  return v.games.join(", ");
-}
+function buildTitle(v) { return v.games.join(', '); }
 
-function render() {
-  const q = document.getElementById('search').value;
+function renderCards(q) {
   const filtered = VIDEOS.filter(v => matches(v, q));
   const grid = document.getElementById('grid');
   const info = document.getElementById('results-info');
@@ -407,65 +584,60 @@ function render() {
   const single = filtered.length === 1;
   grid.className = 'grid' + (single ? ' single-result' : '');
 
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     grid.innerHTML = '<div class="no-results">nichts gefunden.</div>';
     info.textContent = '';
     return;
   }
 
-  if (q.trim()) {
-    info.textContent = filtered.length === VIDEOS.length
-      ? `alle ${VIDEOS.length} videos`
-      : `${filtered.length} von ${VIDEOS.length} videos`;
-  } else {
-    info.textContent = `${VIDEOS.length} videos`;
-  }
+  info.textContent = q.trim()
+    ? (filtered.length === VIDEOS.length ? `alle ${VIDEOS.length} videos` : `${filtered.length} von ${VIDEOS.length} videos`)
+    : `${VIDEOS.length} videos`;
 
   for (const v of filtered) {
     const card = document.createElement('div');
     card.className = 'card' + (single ? ' spotlight' : '');
     card.onclick = () => openModal(v);
-
-    const heartCount = getHeart(v.id);
-
+    const hc = heartCache[v.id] || 0;
     card.innerHTML = `
       <div class="thumb">
         <span class="thumb-label">heute ${v.id}</span>
-        <div class="play-overlay">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </div>
+        <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
       </div>
       <div class="card-body">
-        <div class="card-num">heute ${v.id}${heartCount > 0 ? ` &nbsp;♥ ${heartCount}` : ''}</div>
+        <div class="card-num">heute ${v.id}${hc > 0 ? ` &nbsp;♥ ${hc}` : ''}</div>
         <div class="card-title">${buildTitle(v)}</div>
         <div class="tags">
           ${v.persons.map((p,i) => `<span class="tag person" title="${v.realNames[i]}">${p}</span>`).join('')}
           ${v.games.map(g => `<span class="tag game">${g}</span>`).join('')}
         </div>
-      </div>
-    `;
-
+      </div>`;
     grid.appendChild(card);
   }
 }
 
-function openModal(v) {
+async function openModal(v) {
   currentVideo = v;
-  window._ytPaused = false;
+  comboCount = 0;
+  clearTimeout(comboTimer);
 
   document.getElementById('modal-num').textContent = `HEUTE ${v.id}`;
   document.getElementById('modal-title').textContent = buildTitle(v);
-
-  const tagsEl = document.getElementById('modal-tags');
-  tagsEl.innerHTML =
+  document.getElementById('modal-tags').innerHTML =
     v.persons.map((p,i) => `<span class="tag person">${p} (${v.realNames[i]})</span>`).join('') +
     v.games.map(g => `<span class="tag game">${g}</span>`).join('');
 
-  document.getElementById('heart-count').textContent = getHeart(v.id);
-  document.getElementById('heart-btn').classList.remove('liked');
+  document.getElementById('combo-label').textContent = '';
+  document.getElementById('combo-label').className = 'combo-label';
+
+  // load count from supabase
+  const count = await getHeartCount(v.id);
+  const display = document.getElementById('heart-count-display');
+  display.textContent = count === 1 ? '1 herz' : `${count} herzen`;
+  display.className = 'heart-count-display' + (count > 0 ? ' has-hearts' : '');
 
   const iframe = document.getElementById('player-iframe');
-  iframe.src = `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin || 'null')}`;
+  iframe.src = `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
 
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -476,30 +648,16 @@ function closeModal() {
   document.body.style.overflow = '';
   document.getElementById('player-iframe').src = '';
   currentVideo = null;
-  render();
-}
-
-function clickHeart() {
-  if (!currentVideo) return;
-  addHeart(currentVideo.id);
-  document.getElementById('heart-count').textContent = getHeart(currentVideo.id);
-  const btn = document.getElementById('heart-btn');
-  btn.classList.add('liked');
-  const icon = btn.querySelector('.heart-icon');
-  icon.style.transform = 'scale(1.5)';
-  setTimeout(() => icon.style.transform = '', 150);
+  comboCount = 0;
+  clearTimeout(comboTimer);
+  renderCards(document.getElementById('search').value);
 }
 
 document.addEventListener('keydown', (e) => {
-  const modal = document.getElementById('modal');
-  const isOpen = modal.classList.contains('open');
-
+  const isOpen = document.getElementById('modal').classList.contains('open');
   if (e.key === 'Escape' && isOpen) { closeModal(); return; }
-  if (!isOpen) return;
-  if (document.activeElement.tagName === 'INPUT') return;
-
+  if (!isOpen || document.activeElement.tagName === 'INPUT') return;
   const iframe = document.getElementById('player-iframe');
-
   if (e.key === ' ' || e.code === 'Space') {
     e.preventDefault();
     if (!window._ytPaused) {
@@ -510,7 +668,6 @@ document.addEventListener('keydown', (e) => {
       window._ytPaused = false;
     }
   }
-
   if (e.key === 'f' || e.key === 'F') {
     const pw = document.querySelector('.player-wrap');
     if (document.fullscreenElement) document.exitFullscreen();
@@ -522,9 +679,13 @@ document.getElementById('modal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modal')) closeModal();
 });
 
-document.getElementById('search').addEventListener('input', render);
+document.getElementById('search').addEventListener('input', (e) => renderCards(e.target.value));
 
-render();
+// init
+(async () => {
+  await loadAllHearts();
+  renderCards('');
+})();
 </script>
 </body>
 </html>
