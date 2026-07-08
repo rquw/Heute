@@ -19,8 +19,11 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
+  html, body {
     background: var(--bg);
+  }
+
+  body {
     color: var(--text);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     min-height: 100vh;
@@ -28,6 +31,80 @@
     flex-direction: column;
     align-items: center;
   }
+
+  /* hide the whole app while locked, gate stays visible */
+  body.locked > *:not(#gate) { display: none !important; }
+
+  /* ===== PASSWORD GATE ===== */
+  #gate {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  #gate.hidden { display: none; }
+
+  #gate-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  #gate-input {
+    width: 260px;
+    text-align: center;
+    font-size: 17px;
+    letter-spacing: 3px;
+    padding: 15px 18px;
+    border: 1px solid #e2e2e2;
+    border-radius: 10px;
+    outline: none;
+    color: #222;
+    background: #fbfbfb;
+    font-family: inherit;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  #gate-input::placeholder {
+    color: #bbb;
+    letter-spacing: 1px;
+  }
+
+  #gate-input:focus {
+    border-color: #ccc;
+    background: #ffffff;
+  }
+
+  #gate-input.shake {
+    animation: gate-shake 0.35s ease;
+    border-color: #e08080;
+  }
+
+  @keyframes gate-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+  }
+
+  .gate-error {
+    font-size: 12px;
+    color: #c0392b;
+    height: 14px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .gate-error.show { opacity: 1; }
+
+  /* ===== EXISTING SITE STYLES ===== */
 
   header {
     width: 100%;
@@ -354,7 +431,15 @@
   }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<!-- ===== PASSWORD GATE ===== -->
+<div id="gate">
+  <form id="gate-form" autocomplete="off">
+    <input id="gate-input" type="password" placeholder="passwort" autocomplete="off" autofocus />
+    <div class="gate-error" id="gate-error">falsch.</div>
+  </form>
+</div>
 
 <header><h1>heute.</h1></header>
 
@@ -393,6 +478,66 @@
 </div>
 
 <script>
+// ===== PASSWORD GATE =====
+// Passwords are never stored in plaintext — only their SHA-256 hashes are
+// checked against, client-side. Case-sensitive.
+const GATE_HASHES = new Set([
+  "1b879216dc17755c07c11fd2b7e15dd8df5ef7f8c0a3f27e1c6f0ddb4d2c03b6", // 0907
+  "46ddd8196f72b3e629511ce5c746aaaa82d53df3f9a3e8831d653bbb04ccf13e", // 2802
+  "6e65b61d030e5ac6492802c6f619a63006e5b0e2cafc0170ab92a68083162528", // 0812
+  "85d6385b945c0d602103db39b0b654b2af93b5127938e26a959c123f0789b948", // 2001
+  "5ad4fca71d720f79036d7ba27b999f6a423d69b57877558d43e5d6bdd7b7a8a9", // 3112
+  "75992a5ac67ff644d3063976c2effd10bdd93fcc109798e3d5c1acf2e530d01a", // 1004
+  "f9c6f275600d0a3a06264cca302f245e442e2f5d7283d16eab7f555735519916", // heuteistunglaublichtoll
+]);
+
+async function sha256Hex(str) {
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function tryUnlock(value) {
+  if (!value) return false;
+  const hash = await sha256Hex(value);
+  return GATE_HASHES.has(hash);
+}
+
+function unlockSite() {
+  document.body.classList.remove("locked");
+  document.getElementById("gate").classList.add("hidden");
+  startApp();
+}
+
+function showGateError() {
+  const input = document.getElementById("gate-input");
+  const err = document.getElementById("gate-error");
+  err.classList.add("show");
+  input.classList.remove("shake");
+  void input.offsetWidth;
+  input.classList.add("shake");
+  input.value = "";
+  setTimeout(() => input.classList.remove("shake"), 350);
+}
+
+document.getElementById("gate-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = document.getElementById("gate-input");
+  const ok = await tryUnlock(input.value);
+  if (ok) {
+    unlockSite();
+  } else {
+    showGateError();
+  }
+});
+
+document.getElementById("gate-input").addEventListener("input", () => {
+  document.getElementById("gate-error").classList.remove("show");
+});
+
+document.getElementById("gate-input").focus();
+
+// ===== EXISTING SITE LOGIC =====
 const SUPABASE_URL = 'https://psqwpibpfsmaeviuiali.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzcXdwaWJwZnNtYWV2aXVpYWxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4OTEwMjYsImV4cCI6MjA5NjQ2NzAyNn0.eHUdvXFmLAKjpPlCH0mdNFBkMVX4icjAuXYC3xd5Kkw';
 
@@ -681,11 +826,14 @@ document.getElementById('modal').addEventListener('click', (e) => {
 
 document.getElementById('search').addEventListener('input', (e) => renderCards(e.target.value));
 
-// init
-(async () => {
+// init — only runs once the gate is unlocked
+let _appStarted = false;
+async function startApp() {
+  if (_appStarted) return;
+  _appStarted = true;
   await loadAllHearts();
   renderCards('');
-})();
+}
 </script>
 </body>
 </html>
