@@ -12,8 +12,6 @@
     --border: #2a2a2a;
     --text: #f0f0f0;
     --muted: #666;
-    --heart: #e74c3c;
-    --heart-glow: #ff6b6b;
     --radius: 10px;
   }
 
@@ -32,10 +30,8 @@
     align-items: center;
   }
 
-  /* hide the whole app while locked, gate stays visible */
   body.locked > *:not(#gate) { display: none !important; }
 
-  /* ===== PASSWORD GATE ===== */
   #gate {
     position: fixed;
     inset: 0;
@@ -103,8 +99,6 @@
   }
 
   .gate-error.show { opacity: 1; }
-
-  /* ===== EXISTING SITE STYLES ===== */
 
   header {
     width: 100%;
@@ -258,7 +252,6 @@
   .tag.person { background: #1a1a2e; color: #8888cc; border-color: #2a2a4a; }
   .tag.game   { background: #1a2a1a; color: #77aa77; border-color: #2a3a2a; }
 
-  /* MODAL */
   .modal-bg {
     display: none;
     position: fixed;
@@ -320,107 +313,7 @@
     display: block;
   }
 
-  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; }
-
-  /* BIG HEART BUTTON */
-  .heart-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding-top: 20px;
-    position: relative;
-  }
-
-  .heart-big-btn {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #1a1a1a;
-    border: 2px solid #2a2a2a;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    line-height: 1;
-    transition: border-color 0.2s, background 0.2s, transform 0.1s;
-    position: relative;
-    overflow: visible;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  .heart-big-btn:hover {
-    border-color: var(--heart);
-    background: #1f1010;
-  }
-
-  .heart-big-btn:active { transform: scale(0.9); }
-
-  .heart-big-btn.pumping {
-    animation: heart-pump 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-  }
-
-  @keyframes heart-pump {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.25); }
-    70%  { transform: scale(0.95); }
-    100% { transform: scale(1); }
-  }
-
-  .heart-big-btn.on-fire {
-    border-color: #ff4500;
-    background: #1f0a00;
-    box-shadow: 0 0 20px rgba(255,69,0,0.3);
-  }
-
-  .heart-big-btn.legendary {
-    border-color: #ffd700;
-    background: #1a1500;
-    box-shadow: 0 0 30px rgba(255,215,0,0.4);
-  }
-
-  .heart-count-display {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--muted);
-    transition: color 0.3s;
-    letter-spacing: 0.5px;
-  }
-
-  .heart-count-display.has-hearts { color: var(--heart); }
-  .heart-count-display.on-fire { color: #ff6b00; }
-  .heart-count-display.legendary { color: #ffd700; }
-
-  .combo-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    height: 16px;
-    transition: color 0.2s;
-  }
-
-  .combo-label.active { color: #ff6b00; }
-  .combo-label.legendary { color: #ffd700; }
-
-  /* floating +1 particles */
-  .floaty {
-    position: absolute;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--heart);
-    pointer-events: none;
-    animation: floaty-up 0.9s ease-out forwards;
-    white-space: nowrap;
-  }
-
-  @keyframes floaty-up {
-    0%   { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-70px) scale(0.6); }
-  }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; padding-bottom: 20px; }
 
   .no-results {
     grid-column: 1/-1;
@@ -433,7 +326,6 @@
 </head>
 <body class="locked">
 
-<!-- ===== PASSWORD GATE ===== -->
 <div id="gate">
   <form id="gate-form" autocomplete="off">
     <input id="gate-input" type="password" placeholder="passwort" autocomplete="off" autofocus />
@@ -468,27 +360,18 @@
     </div>
 
     <div class="modal-tags" id="modal-tags"></div>
-
-    <div class="heart-section">
-      <div class="combo-label" id="combo-label"></div>
-      <button class="heart-big-btn" id="heart-big-btn" onclick="clickHeart()">♥</button>
-      <div class="heart-count-display" id="heart-count-display">0</div>
-    </div>
   </div>
 </div>
 
 <script>
-// ===== PASSWORD GATE =====
-// Passwords are never stored in plaintext — only their SHA-256 hashes are
-// checked against, client-side. Case-sensitive.
 const GATE_HASHES = new Set([
-  "1b879216dc17755c07c11fd2b7e15dd8df5ef7f8c0a3f27e1c6f0ddb4d2c03b6", // 0907
-  "46ddd8196f72b3e629511ce5c746aaaa82d53df3f9a3e8831d653bbb04ccf13e", // 2802
-  "6e65b61d030e5ac6492802c6f619a63006e5b0e2cafc0170ab92a68083162528", // 0812
-  "85d6385b945c0d602103db39b0b654b2af93b5127938e26a959c123f0789b948", // 2001
-  "5ad4fca71d720f79036d7ba27b999f6a423d69b57877558d43e5d6bdd7b7a8a9", // 3112
-  "75992a5ac67ff644d3063976c2effd10bdd93fcc109798e3d5c1acf2e530d01a", // 1004
-  "f9c6f275600d0a3a06264cca302f245e442e2f5d7283d16eab7f555735519916", // heuteistunglaublichtoll
+  "1b879216dc17755c07c11fd2b7e15dd8df5ef7f8c0a3f27e1c6f0ddb4d2c03b6",
+  "46ddd8196f72b3e629511ce5c746aaaa82d53df3f9a3e8831d653bbb04ccf13e",
+  "6e65b61d030e5ac6492802c6f619a63006e5b0e2cafc0170ab92a68083162528",
+  "85d6385b945c0d602103db39b0b654b2af93b5127938e26a959c123f0789b948",
+  "5ad4fca71d720f79036d7ba27b999f6a423d69b57877558d43e5d6bdd7b7a8a9",
+  "75992a5ac67ff644d3063976c2effd10bdd93fcc109798e3d5c1acf2e530d01a",
+  "f9c6f275600d0a3a06264cca302f245e442e2f5d7283d16eab7f555735519916",
 ]);
 
 async function sha256Hex(str) {
@@ -537,67 +420,6 @@ document.getElementById("gate-input").addEventListener("input", () => {
 
 document.getElementById("gate-input").focus();
 
-// ===== EXISTING SITE LOGIC =====
-const SUPABASE_URL = 'https://psqwpibpfsmaeviuiali.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzcXdwaWJwZnNtYWV2aXVpYWxpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4OTEwMjYsImV4cCI6MjA5NjQ2NzAyNn0.eHUdvXFmLAKjpPlCH0mdNFBkMVX4icjAuXYC3xd5Kkw';
-
-async function sbFetch(path, opts = {}) {
-  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...opts,
-    headers: {
-      'apikey': SUPABASE_ANON,
-      'Authorization': `Bearer ${SUPABASE_ANON}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation',
-      ...(opts.headers || {}),
-    },
-  });
-}
-
-// hearts cache: { videoId: count }
-let heartCache = {};
-
-async function loadAllHearts() {
-  try {
-    const r = await sbFetch('hearts?select=video_id,count');
-    if (r.ok) {
-      const data = await r.json();
-      heartCache = {};
-      for (const row of data) heartCache[row.video_id] = row.count;
-    }
-  } catch(e) {}
-}
-
-async function getHeartCount(videoId) {
-  try {
-    const r = await sbFetch(`hearts?video_id=eq.${videoId}&select=count`);
-    if (r.ok) {
-      const data = await r.json();
-      if (data.length) { heartCache[videoId] = data[0].count; return data[0].count; }
-    }
-  } catch(e) {}
-  return heartCache[videoId] || 0;
-}
-
-async function incrementHeart(videoId) {
-  try {
-    // upsert: if row exists increment, else insert with count=1
-    const r = await sbFetch('hearts', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify({ video_id: videoId, count: 1 }),
-    });
-    if (r.ok) {
-      const data = await r.json();
-      const newCount = Array.isArray(data) ? data[0]?.count : data?.count;
-      if (newCount !== undefined) { heartCache[videoId] = newCount; return newCount; }
-    }
-  } catch(e) {}
-  // fallback local
-  heartCache[videoId] = (heartCache[videoId] || 0) + 1;
-  return heartCache[videoId];
-}
-
 const VIDEOS = [
   { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
   { id:2,  videoId:"7BeJxzEZVz0", persons:["rquw","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Roblox Rivals"] },
@@ -617,84 +439,6 @@ const VIDEOS = [
 ];
 
 let currentVideo = null;
-let comboCount = 0;
-let comboTimer = null;
-
-const COMBO_TIERS = [
-  { min: 50, label: '👑 LEGENDARY', cls: 'legendary' },
-  { min: 20, label: '🔥 ON FIRE',   cls: 'on-fire' },
-  { min: 10, label: '⚡ COMBO x',   cls: 'active', showCount: true },
-  { min: 5,  label: '× ',           cls: 'active', showCount: true },
-  { min: 2,  label: '× ',           cls: 'active', showCount: true },
-];
-
-function getTier(combo) {
-  for (const t of COMBO_TIERS) {
-    if (combo >= t.min) return t;
-  }
-  return null;
-}
-
-function spawnFloaty(btn, combo) {
-  const section = document.querySelector('.heart-section');
-  const el = document.createElement('div');
-  el.className = 'floaty';
-
-  const tier = getTier(combo);
-  if (tier && combo >= 50) el.textContent = '♥♥♥';
-  else if (tier && combo >= 20) el.textContent = '♥♥';
-  else el.textContent = '+1';
-
-  el.style.left = (btn.offsetLeft + btn.offsetWidth / 2 - 15 + (Math.random() * 30 - 15)) + 'px';
-  el.style.top  = (btn.offsetTop - 10) + 'px';
-  section.style.position = 'relative';
-  section.appendChild(el);
-  setTimeout(() => el.remove(), 900);
-}
-
-function updateHeartUI(count, combo) {
-  const btn = document.getElementById('heart-big-btn');
-  const display = document.getElementById('heart-count-display');
-  const label = document.getElementById('combo-label');
-
-  // count
-  display.textContent = count === 1 ? '1 herz' : `${count} herzen`;
-  display.className = 'heart-count-display' + (count > 0 ? (count >= 50 ? ' legendary' : count >= 20 ? ' on-fire' : ' has-hearts') : '');
-
-  // btn state
-  btn.className = 'heart-big-btn' + (count >= 50 ? ' legendary' : count >= 20 ? ' on-fire' : '');
-
-  // combo label
-  const tier = getTier(combo);
-  if (tier && combo >= 2) {
-    label.className = 'combo-label ' + tier.cls;
-    label.textContent = tier.showCount ? tier.label + combo : tier.label;
-  } else {
-    label.className = 'combo-label';
-    label.textContent = '';
-  }
-
-  // pump animation
-  btn.classList.remove('pumping');
-  void btn.offsetWidth;
-  btn.classList.add('pumping');
-  setTimeout(() => btn.classList.remove('pumping'), 300);
-}
-
-async function clickHeart() {
-  if (!currentVideo) return;
-
-  comboCount++;
-  clearTimeout(comboTimer);
-  comboTimer = setTimeout(() => { comboCount = 0; }, 1500);
-
-  const newCount = await incrementHeart(currentVideo.id);
-  spawnFloaty(document.getElementById('heart-big-btn'), comboCount);
-  updateHeartUI(newCount, comboCount);
-
-  // refresh card
-  renderCards(document.getElementById('search').value);
-}
 
 function matchesToken(v, token) {
   const t = token.toLowerCase();
@@ -743,14 +487,13 @@ function renderCards(q) {
     const card = document.createElement('div');
     card.className = 'card' + (single ? ' spotlight' : '');
     card.onclick = () => openModal(v);
-    const hc = heartCache[v.id] || 0;
     card.innerHTML = `
       <div class="thumb">
         <span class="thumb-label">heute ${v.id}</span>
         <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
       </div>
       <div class="card-body">
-        <div class="card-num">heute ${v.id}${hc > 0 ? ` &nbsp;♥ ${hc}` : ''}</div>
+        <div class="card-num">heute ${v.id}</div>
         <div class="card-title">${buildTitle(v)}</div>
         <div class="tags">
           ${v.persons.map((p,i) => `<span class="tag person" title="${v.realNames[i]}">${p}</span>`).join('')}
@@ -761,25 +504,14 @@ function renderCards(q) {
   }
 }
 
-async function openModal(v) {
+function openModal(v) {
   currentVideo = v;
-  comboCount = 0;
-  clearTimeout(comboTimer);
 
   document.getElementById('modal-num').textContent = `HEUTE ${v.id}`;
   document.getElementById('modal-title').textContent = buildTitle(v);
   document.getElementById('modal-tags').innerHTML =
     v.persons.map((p,i) => `<span class="tag person">${p} (${v.realNames[i]})</span>`).join('') +
     v.games.map(g => `<span class="tag game">${g}</span>`).join('');
-
-  document.getElementById('combo-label').textContent = '';
-  document.getElementById('combo-label').className = 'combo-label';
-
-  // load count from supabase
-  const count = await getHeartCount(v.id);
-  const display = document.getElementById('heart-count-display');
-  display.textContent = count === 1 ? '1 herz' : `${count} herzen`;
-  display.className = 'heart-count-display' + (count > 0 ? ' has-hearts' : '');
 
   const iframe = document.getElementById('player-iframe');
   iframe.src = `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
@@ -793,8 +525,6 @@ function closeModal() {
   document.body.style.overflow = '';
   document.getElementById('player-iframe').src = '';
   currentVideo = null;
-  comboCount = 0;
-  clearTimeout(comboTimer);
   renderCards(document.getElementById('search').value);
 }
 
@@ -826,12 +556,10 @@ document.getElementById('modal').addEventListener('click', (e) => {
 
 document.getElementById('search').addEventListener('input', (e) => renderCards(e.target.value));
 
-// init — only runs once the gate is unlocked
 let _appStarted = false;
-async function startApp() {
+function startApp() {
   if (_appStarted) return;
   _appStarted = true;
-  await loadAllHearts();
   renderCards('');
 }
 </script>
