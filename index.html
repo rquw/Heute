@@ -441,18 +441,25 @@ const VIDEOS = [
 
 let currentVideo = null;
 
+// splits a tag string into lowercase words, so "Make It Meme" -> ["make","it","meme"]
+function wordsOf(str) {
+  return str.toLowerCase().split(/\s+/).filter(Boolean);
+}
+
 function matchesToken(v, token) {
   const t = token.toLowerCase();
   if (!t) return true;
   const numMatch = t.match(/^(?:heute\s*)?(\d+)$/);
   if (numMatch && parseInt(numMatch[1]) === v.id) return true;
   if (t === 'heute') return true;
+
+  // word-prefix match instead of includes-anywhere, so "it" doesn't hit "Fortnite" or "Kit"
   for (let i = 0; i < v.persons.length; i++) {
-    if (v.persons[i].toLowerCase().includes(t)) return true;
-    if (v.realNames[i].toLowerCase().includes(t)) return true;
+    if (wordsOf(v.persons[i]).some(w => w.startsWith(t))) return true;
+    if (wordsOf(v.realNames[i]).some(w => w.startsWith(t))) return true;
   }
   for (const g of v.games) {
-    if (g.toLowerCase().includes(t)) return true;
+    if (wordsOf(g).some(w => w.startsWith(t))) return true;
   }
   return false;
 }
