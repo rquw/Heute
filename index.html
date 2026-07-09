@@ -421,7 +421,7 @@ document.getElementById("gate-input").addEventListener("input", () => {
 document.getElementById("gate-input").focus();
 
 const VIDEOS = [
-  { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","CloudMelt","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
+  { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","CloudMelt","XRClon"],                                                    realNames:["Fabio","Chrisi","Xaver"],                             games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
   { id:2,  videoId:"7BeJxzEZVz0", persons:["rquw","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Roblox Rivals"] },
   { id:3,  videoId:"-GqyFOPw3QU", persons:["rquw","CloudMelt","Zaykee","XRClon","Kit"],                        realNames:["Fabio","Chrisi","Niki","Xaver","Martin"],     games:["Make It Meme","Richup","Roblox Rivals","Minecraft"] },
   { id:4,  videoId:"jJZ6pZ5v80c", persons:["rquw","CloudMelt","Zaykee","XRClon"],                               realNames:["Fabio","Chrisi","Niki","Xaver"],              games:["Piko Park"] },
@@ -441,9 +441,11 @@ const VIDEOS = [
 
 let currentVideo = null;
 
-// splits a tag string into lowercase words, so "Make It Meme" -> ["make","it","meme"]
+// splits a tag string into lowercase words, e.g. "Make It Meme" -> ["make","it","meme"]
+// returns [] for missing/undefined so a data typo (mismatched persons/realNames length) can't crash search
 function wordsOf(str) {
-  return str.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!str) return [];
+  return String(str).toLowerCase().split(/\s+/).filter(Boolean);
 }
 
 function matchesToken(v, token) {
@@ -504,7 +506,7 @@ function renderCards(q) {
         <div class="card-num">heute ${v.id}</div>
         <div class="card-title">${buildTitle(v)}</div>
         <div class="tags">
-          ${v.persons.map((p,i) => `<span class="tag person" title="${v.realNames[i]}">${p}</span>`).join('')}
+          ${v.persons.map((p,i) => `<span class="tag person" title="${v.realNames[i] || ''}">${p}</span>`).join('')}
           ${v.games.map(g => `<span class="tag game">${g}</span>`).join('')}
         </div>
       </div>`;
@@ -518,7 +520,7 @@ function openModal(v) {
   document.getElementById('modal-num').textContent = `HEUTE ${v.id}`;
   document.getElementById('modal-title').textContent = buildTitle(v);
   document.getElementById('modal-tags').innerHTML =
-    v.persons.map((p,i) => `<span class="tag person">${p} (${v.realNames[i]})</span>`).join('') +
+    v.persons.map((p,i) => `<span class="tag person">${p} (${v.realNames[i] || '?'})</span>`).join('') +
     v.games.map(g => `<span class="tag game">${g}</span>`).join('');
 
   const iframe = document.getElementById('player-iframe');
