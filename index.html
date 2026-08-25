@@ -359,6 +359,142 @@
     * { animation: none !important; transition: none !important; }
     .card:hover { transform: none; }
   }
+
+  /* ---------- fresh (< 7 days) ---------- */
+
+  .card.fresh {
+    border-color: #e6c200;
+    box-shadow: 0 0 0 1px #e6c200, 0 0 24px -4px rgba(230, 194, 0, 0.55);
+  }
+
+  .card.fresh:hover,
+  .card.fresh:focus-visible {
+    border-color: #ffdb1a;
+    box-shadow: 0 0 0 1px #ffdb1a, 0 0 28px -2px rgba(255, 219, 26, 0.7);
+  }
+
+  @keyframes fresh-pulse {
+    0%, 100% { box-shadow: 0 0 0 1px #e6c200, 0 0 20px -6px rgba(230, 194, 0, 0.45); }
+    50%      { box-shadow: 0 0 0 1px #ffdb1a, 0 0 30px -2px rgba(255, 219, 26, 0.75); }
+  }
+
+  .card.fresh { animation: fresh-pulse 2.6s ease-in-out infinite; }
+
+  .badge-new {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    padding: 3px 9px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #1a1400;
+    background: #ffd21a;
+    border-radius: 20px;
+  }
+
+  /* ---------- native (catbox) video thumb ---------- */
+
+  .thumb video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: #000;
+  }
+
+  .player-wrap video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  /* ---------- owner: add tile + form ---------- */
+
+  .card.add {
+    background: transparent;
+    border-style: dashed;
+    border-color: #333;
+  }
+
+  .card.add:hover,
+  .card.add:focus-visible {
+    border-color: #ffd21a;
+    transform: translateY(-2px);
+    box-shadow: none;
+  }
+
+  .card.add .thumb { background: transparent; }
+
+  .add-plus {
+    font-size: 46px;
+    font-weight: 200;
+    line-height: 1;
+    color: #555;
+    transition: color var(--ease);
+  }
+
+  .card.add:hover .add-plus,
+  .card.add:focus-visible .add-plus { color: #ffd21a; }
+
+  .add-cap {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  #addform-fields { display: flex; flex-direction: column; gap: 12px; }
+
+  #addform label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+
+  #addform input {
+    width: 100%;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color var(--ease);
+  }
+
+  #addform input:focus { border-color: var(--border-hi); }
+
+  .add-actions { display: flex; gap: 10px; padding-top: 6px; }
+
+  .btn {
+    padding: 11px 18px;
+    font: inherit;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #1a2a1a;
+    color: #cfe6cf;
+    transition: border-color var(--ease);
+  }
+
+  .btn:hover { border-color: #3a5a3a; }
+  .btn.ghost { background: none; color: var(--muted); }
+  .btn.ghost:hover { border-color: var(--muted); color: var(--text); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+
+  .add-status { padding-top: 10px; font-size: 13px; color: var(--muted); min-height: 18px; }
+  .add-status.err { color: #e08080; }
+  .add-status.ok { color: #77aa77; }
 </style>
 </head>
 <body class="locked">
@@ -390,13 +526,47 @@
       <button class="close-btn" id="close-btn" aria-label="schließen">×</button>
     </div>
 
-    <div class="player-wrap">
-      <iframe id="player-iframe" title="video"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-        allowfullscreen></iframe>
-    </div>
+    <div class="player-wrap" id="player-wrap"></div>
 
     <div class="modal-tags" id="modal-tags"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="add" role="dialog" aria-modal="true" aria-labelledby="add-title">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-num">NEUES VIDEO</div>
+        <div class="modal-title" id="add-title">heute hinzufügen</div>
+      </div>
+      <button class="close-btn" id="add-close" aria-label="schließen">×</button>
+    </div>
+
+    <form id="addform" autocomplete="off">
+      <div id="addform-fields">
+        <div>
+          <label for="add-yt">youtube-url oder video-id (optional)</label>
+          <input id="add-yt" type="text" placeholder="https://youtu.be/…">
+        </div>
+        <div>
+          <label for="add-file">catbox-/datei-url .mp4 (optional)</label>
+          <input id="add-file" type="text" placeholder="https://files.catbox.moe/….mp4">
+        </div>
+        <div>
+          <label for="add-persons">spieler (mit komma trennen)</label>
+          <input id="add-persons" type="text" placeholder="rquw, CloudMelt, …">
+        </div>
+        <div>
+          <label for="add-games">games (mit komma trennen)</label>
+          <input id="add-games" type="text" placeholder="Minecraft, Fortnite, …">
+        </div>
+      </div>
+      <div class="add-actions">
+        <button type="submit" class="btn" id="add-submit">hinzufügen &amp; live schalten</button>
+        <button type="button" class="btn ghost" id="add-cancel">abbrechen</button>
+      </div>
+      <div class="add-status" id="add-status"></div>
+    </form>
   </div>
 </div>
 
@@ -405,37 +575,49 @@
 
 const $ = (id) => document.getElementById(id);
 
+/* ============================ config ============================ */
+/* After deploying the Cloudflare Worker (see worker/README), paste its URL
+   here. Empty -> the add-tile downloads the new index.html instead of
+   auto-committing. The URL is public; the publish secret is typed at runtime
+   and only lives in memory.                                                  */
+const PUBLISH_URL = "";
+
+const FRESH_DAYS = 7;
+
 /* ============================ encrypted payload ============================ */
 /* AES-256-GCM ciphertext. Without a valid password there is nothing here but
-   noise — the video ids, names and games only exist once decrypted. Regenerate
-   with build/encrypt.mjs (or encrypt.html) when passwords or data change.       */
+   noise. Regenerate with build/encrypt.mjs when passwords change; the add-tile
+   re-encrypts the data in place (same content key, wraps untouched).          */
 
-const BLOB = {"v":1,"iter":310000,"iv":"d8sWf4kZhBVj3Qau","ct":"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","wraps":[{"salt":"AQKNAzaa2sN/4o1if2r+yQ==","iv":"BqUVAHhJ162ARo35","key":"NaPgozuHxHsE+fHCQ1QpPf8BYpeEgaS1zSyuUpLjnONvM7SKsueAxKfbnuuy4o4H"},{"salt":"c+2SVIVKN3mvT3+KZ6jMtg==","iv":"nqy/YQa5wIKeFhn2","key":"Ghi14dxrbWsm6O4GKXdXz9BFVHw3vm8QjMUXfuY/kpOkMwJbaEm5k5PigwbiYGsu"},{"salt":"YHxzw3gzwF52vDB3XGwgfA==","iv":"g6XyuHLgxIofYWkC","key":"FdRPiny7fayasMVABBpYXPOtjs94PSuegrrXpaTzd0JRKj47fTGkOu4fhlNbKghe"},{"salt":"pV1781pnLqMRrSMD8XghHQ==","iv":"2VG0Z3s/aytkLoag","key":"c+GBJr8gmlbl6pCYdaNZDWp/ktRhvZQQ39KaJm0naRO7d4JcAh6hgWYElVUXyf2V"},{"salt":"J8ayj/UWIgc55QCUKkunEQ==","iv":"WytfhUtkBzd5Yk4c","key":"1ME0ne2ppcz8VCuPpOZ3IPQqGuTrFxJrwkxYrb4vorC5O5V13xcJ4LhRCJ/qRTsH"},{"salt":"ObYvH/ErXU93t9pchQOZig==","iv":"Vlt29Wn9JVG//j4B","key":"O7CfxGXRP6saEHTPzD9m3P1xaKl8M7RIHepf8eeLnRsX3qhhUaZBxEVkRBP4TcfL"}]};
+const BLOB = {"v":1,"iter":310000,"iv":"amBmcJ+CsHhU4SPd","ct":"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","wraps":[{"salt":"0sjYoJ/7DjXgf8QArDsveg==","iv":"DLkR52qTMdeNMGGT","key":"Bmw3UWxv0qQcy1ortavi5e6kX+lCa0z0AhCgEIYTrsD9Kt3j0t6/3Ew4ww9ujZrm","owner":true},{"salt":"GeBtkmO3krRNU8NsmVSgFg==","iv":"YSXL9LFmzF2BvY+y","key":"uH/d3d5B3+KIKRiMpIHDC1wjnJuvSogHSAEXMbFwnzMwk9tctG78GcDFNHX/Q5dS"},{"salt":"0NYWtX9GZD9TYKw3HYv4xg==","iv":"KcusXYfAmsCjzjDC","key":"omJt2jNNCfkrvS/hPu8fusNhBXVHzqxgXBTfDfW2FVOWiVUcsF4ygvKw65UTcpUc"},{"salt":"eqcPxmDQionGqLDv040qag==","iv":"ASt0152tx7x4wrx0","key":"vhhCbmnf1OekxmEr1nStHVfKUqbQLaVKtWhYMfiQfg4DS5rOcfsd+QBjbeTGPRGM"},{"salt":"UWHbNgMUEsFvm9aAlYWtig==","iv":"gGwx5NY+OfsAT8RD","key":"B3BWl9TAGwCYq36MSmND1PCBOx7OiNIYIGgrQsDhuei3whWab/8sLoD+HyBMyOeG"},{"salt":"fb+VuAcH6nbkRHpkgR4HRQ==","iv":"UQ3IShYlJxojHA3O","key":"R5TLOgvn4JVFT1uV3uTygyrsNqJO//9Qy05RY/kObY9o3GMmdcTBCLacPeepTg4c"}]};
 
 /* ============================ crypto ============================ */
 
 const b64ToBytes = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const bytesToB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
 
-async function deriveKek(password, salt) {
+async function deriveKek(password, salt, usage) {
   const base = await crypto.subtle.importKey(
     "raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
     { name: "PBKDF2", salt, iterations: BLOB.iter, hash: "SHA-256" },
-    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    base, { name: "AES-GCM", length: 256 }, false, [usage]);
 }
 
-// returns the decoded payload object, or null if the password fits no wrap
+// returns { payload, owner, contentKey } or null if the password fits no wrap
 async function decryptPayload(password) {
   for (const w of BLOB.wraps) {
     try {
-      const kek = await deriveKek(password, b64ToBytes(w.salt));
+      const kek = await deriveKek(password, b64ToBytes(w.salt), "decrypt");
       const rawKey = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: b64ToBytes(w.iv) }, kek, b64ToBytes(w.key));
+      // extractable + encrypt usage so the owner can re-encrypt when adding videos
       const contentKey = await crypto.subtle.importKey(
-        "raw", rawKey, "AES-GCM", false, ["decrypt"]);
+        "raw", rawKey, "AES-GCM", true, ["encrypt", "decrypt"]);
       const plain = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: b64ToBytes(BLOB.iv) }, contentKey, b64ToBytes(BLOB.ct));
-      return JSON.parse(new TextDecoder().decode(plain));
+      return { payload: JSON.parse(new TextDecoder().decode(plain)),
+               owner: !!w.owner, contentKey };
     } catch {
       // wrong password for this wrap (GCM tag mismatch) — try the next one
     }
@@ -447,15 +629,21 @@ async function decryptPayload(password) {
 
 let PEOPLE = {};
 let VIDEOS = [];
+let CONTENT_KEY = null;
+let IS_OWNER = false;
 
 const realName = (p) => PEOPLE[p]?.real || "?";
 const aliasesOf = (p) => PEOPLE[p]?.aka || [];
 const videoTitle = (v) => v.games.join(", ");
 
-// youtube serves the opening frame at maxresdefault; mqdefault is the
-// low-res fallback for videos that have no maxres rendition
-const frameUrl = (videoId, quality = "maxresdefault") =>
+const ytThumb = (videoId, quality = "maxresdefault") =>
   `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`;
+
+function isFresh(v) {
+  if (!v.uploaded) return false;
+  const days = (Date.now() - new Date(v.uploaded + "T00:00:00").getTime()) / 864e5;
+  return days >= 0 && days < FRESH_DAYS;
+}
 
 /* ============================ gate ============================ */
 
@@ -468,9 +656,11 @@ function showGateError() {
   input.value = "";
 }
 
-function unlockSite(payload) {
-  PEOPLE = payload.people;
-  VIDEOS = payload.videos;
+function unlockSite(res) {
+  PEOPLE = res.payload.people;
+  VIDEOS = res.payload.videos;
+  CONTENT_KEY = res.contentKey;
+  IS_OWNER = res.owner;
   document.body.classList.remove("locked");
   $("gate").hidden = true;
   renderCards("");
@@ -480,14 +670,13 @@ function unlockSite(payload) {
 $("gate-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = $("gate-input");
-  const value = input.value;
-  if (!value) return;
+  if (!input.value) return;
 
   input.disabled = true;
-  const payload = await decryptPayload(value); // PBKDF2 is intentionally slow
+  const res = await decryptPayload(input.value); // PBKDF2 is intentionally slow
   input.disabled = false;
 
-  if (payload) unlockSite(payload);
+  if (res) unlockSite(res);
   else { showGateError(); input.focus(); }
 });
 
@@ -527,24 +716,45 @@ const personTag = (p, withReal) =>
 
 const gameTag = (g) => `<span class="tag game">${escapeHtml(g)}</span>`;
 
-function buildThumb(v) {
-  const thumb = document.createElement("div");
-  thumb.className = "thumb";
-  thumb.innerHTML = `
-    <span class="thumb-label">heute ${v.id}</span>
-    <div class="play-overlay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>`;
-
+// a youtube still that falls back maxres -> mqdefault -> nothing
+function ytImg(v) {
   const img = document.createElement("img");
-  img.src = frameUrl(v.videoId);
-  img.alt = `erster frame von heute ${v.id}`;
+  img.src = ytThumb(v.videoId);
+  img.alt = `thumbnail von heute ${v.id}`;
   img.loading = "lazy";
   img.decoding = "async";
   img.addEventListener("error", () => {
-    // maxres missing -> try the low-res frame once, then fall back to the label
     if (img.dataset.retried) img.remove();
-    else { img.dataset.retried = "1"; img.src = frameUrl(v.videoId, "mqdefault"); }
+    else { img.dataset.retried = "1"; img.src = ytThumb(v.videoId, "mqdefault"); }
   });
-  thumb.prepend(img);
+  return img;
+}
+
+function buildThumb(v) {
+  const thumb = document.createElement("div");
+  thumb.className = "thumb";
+  thumb.innerHTML =
+    (isFresh(v) ? '<span class="badge-new">neu</span>' : "") +
+    `<span class="thumb-label">heute ${v.id}</span>
+     <div class="play-overlay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>`;
+
+  if (v.file) {
+    // native first frame; on failure fall back to the youtube still, then the label
+    const vid = document.createElement("video");
+    vid.src = v.file;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.preload = "metadata";
+    vid.tabIndex = -1;
+    vid.addEventListener("loadeddata", () => { try { vid.currentTime = 0.05; } catch {} });
+    vid.addEventListener("error", () => {
+      vid.remove();
+      if (v.videoId) thumb.prepend(ytImg(v));
+    });
+    thumb.prepend(vid);
+  } else if (v.videoId) {
+    thumb.prepend(ytImg(v));
+  }
 
   return thumb;
 }
@@ -552,7 +762,7 @@ function buildThumb(v) {
 function buildCard(v, spotlight) {
   const card = document.createElement("button");
   card.type = "button";
-  card.className = "card" + (spotlight ? " spotlight" : "");
+  card.className = "card" + (spotlight ? " spotlight" : "") + (isFresh(v) ? " fresh" : "");
   card.addEventListener("click", () => openModal(v));
 
   const body = document.createElement("div");
@@ -566,6 +776,18 @@ function buildCard(v, spotlight) {
     </div>`;
 
   card.append(buildThumb(v), body);
+  return card;
+}
+
+function buildAddTile() {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "card add";
+  card.setAttribute("aria-label", "neues video hinzufügen");
+  card.addEventListener("click", openAdd);
+  card.innerHTML = `
+    <div class="thumb"><span class="add-plus">+</span></div>
+    <div class="add-cap">neues video</div>`;
   return card;
 }
 
@@ -583,22 +805,48 @@ function renderCards(q) {
     return;
   }
 
-  const single = filtered.length === 1;
+  const single = filtered.length === 1 && !IS_OWNER;
   grid.className = "grid" + (single ? " single-result" : "");
   info.textContent = filtered.length === VIDEOS.length
     ? `${VIDEOS.length} videos`
     : `${filtered.length} von ${VIDEOS.length} videos`;
 
   grid.append(...filtered.map(v => buildCard(v, single)));
+  // owner-only "add" tile, shown when browsing the full list
+  if (IS_OWNER && !q.trim()) grid.append(buildAddTile());
 }
 
-/* ============================ modal ============================ */
+/* ============================ modal / player ============================ */
 
 let ytPaused = false;
 
-function postToPlayer(func) {
-  $("player-iframe").contentWindow.postMessage(
-    JSON.stringify({ event: "command", func, args: "" }), "*");
+function clearPlayer() {
+  const wrap = $("player-wrap");
+  const vid = wrap.querySelector("video");
+  if (vid) { vid.pause(); vid.removeAttribute("src"); vid.load(); }
+  wrap.replaceChildren();
+}
+
+function mountYouTube(v) {
+  clearPlayer();
+  const iframe = document.createElement("iframe");
+  iframe.title = "video";
+  iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
+  iframe.allowFullscreen = true;
+  iframe.src = `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
+  $("player-wrap").append(iframe);
+}
+
+function mountVideo(v) {
+  clearPlayer();
+  const vid = document.createElement("video");
+  vid.src = v.file;
+  vid.controls = true;
+  vid.autoplay = true;
+  vid.playsInline = true;
+  // catbox down / rate-limited / dead file -> silently fall back to youtube
+  vid.addEventListener("error", () => { if (v.videoId) mountYouTube(v); });
+  $("player-wrap").append(vid);
 }
 
 function openModal(v) {
@@ -609,8 +857,8 @@ function openModal(v) {
   $("modal-tags").innerHTML =
     v.persons.map(p => personTag(p, true)).join("") + v.games.map(gameTag).join("");
 
-  $("player-iframe").src =
-    `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
+  if (v.file) mountVideo(v);
+  else mountYouTube(v);
 
   $("modal").classList.add("open");
   document.body.style.overflow = "hidden";
@@ -618,29 +866,154 @@ function openModal(v) {
 
 function closeModal() {
   $("modal").classList.remove("open");
-  $("player-iframe").src = "about:blank"; // stops playback; "" would reload this page into the frame
+  clearPlayer();
   document.body.style.overflow = "";
 }
 
-const modalIsOpen = () => $("modal").classList.contains("open");
+const anyModalOpen = () =>
+  $("modal").classList.contains("open") || $("add").classList.contains("open");
 
 $("close-btn").addEventListener("click", closeModal);
 $("modal").addEventListener("click", (e) => { if (e.target === $("modal")) closeModal(); });
 $("search").addEventListener("input", (e) => renderCards(e.target.value));
 
 document.addEventListener("keydown", (e) => {
-  if (!modalIsOpen()) return;
-
+  if (!$("modal").classList.contains("open")) return;
   if (e.key === "Escape") { closeModal(); return; }
   if (document.activeElement.tagName === "INPUT") return;
 
+  const wrap = $("player-wrap");
+  const vid = wrap.querySelector("video");
+  const iframe = wrap.querySelector("iframe");
+
   if (e.code === "Space") {
     e.preventDefault();
-    postToPlayer(ytPaused ? "playVideo" : "pauseVideo");
-    ytPaused = !ytPaused;
+    if (vid) { vid.paused ? vid.play() : vid.pause(); }
+    else if (iframe) {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: "command", func: ytPaused ? "playVideo" : "pauseVideo", args: "" }), "*");
+      ytPaused = !ytPaused;
+    }
   } else if (e.key.toLowerCase() === "f") {
     if (document.fullscreenElement) document.exitFullscreen();
-    else document.querySelector(".player-wrap").requestFullscreen().catch(() => {});
+    else wrap.requestFullscreen().catch(() => {});
+  }
+});
+
+/* ============================ owner: add + publish ============================ */
+
+const YT_ID = /(?:v=|\/embed\/|youtu\.be\/|\/shorts\/)([A-Za-z0-9_-]{11})/;
+const parseYt = (s) => {
+  s = s.trim();
+  if (!s) return "";
+  const m = s.match(YT_ID);
+  if (m) return m[1];
+  return /^[A-Za-z0-9_-]{11}$/.test(s) ? s : "";
+};
+const splitList = (s) => s.split(",").map(x => x.trim()).filter(Boolean);
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
+function setAddStatus(msg, kind) {
+  const el = $("add-status");
+  el.textContent = msg;
+  el.className = "add-status" + (kind ? " " + kind : "");
+}
+
+function openAdd() {
+  $("addform").reset();
+  setAddStatus("");
+  $("add").classList.add("open");
+  document.body.style.overflow = "hidden";
+  $("add-yt").focus();
+}
+
+function closeAdd() {
+  $("add").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+$("add-close").addEventListener("click", closeAdd);
+$("add-cancel").addEventListener("click", closeAdd);
+$("add").addEventListener("click", (e) => { if (e.target === $("add")) closeAdd(); });
+
+// re-encrypt the current data with the SAME content key (wraps stay valid)
+async function rebuildBlob() {
+  const bytes = new TextEncoder().encode(JSON.stringify({ people: PEOPLE, videos: VIDEOS }));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, CONTENT_KEY, bytes);
+  return { ...BLOB, iv: bytesToB64(iv), ct: bytesToB64(ct) };
+}
+
+async function buildNewIndexHtml(newBlob) {
+  const src = await (await fetch(location.href, { cache: "no-store" })).text();
+  const line = "const BLOB = " + JSON.stringify(newBlob) + ";";
+  // anchored on {"v": so it hits the data line, not the code that mentions "const BLOB"
+  const re = /const BLOB = \{"v":.*\};/;
+  if (!re.test(src)) throw new Error("BLOB-zeile nicht gefunden");
+  return src.replace(re, () => line);
+}
+
+async function publish(html) {
+  if (PUBLISH_URL) {
+    const secret = sessionStorage.getItem("heute_pub") ||
+      prompt("publish-secret (einmal pro sitzung):") || "";
+    sessionStorage.setItem("heute_pub", secret);
+    const r = await fetch(PUBLISH_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ secret, html }),
+    });
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) sessionStorage.removeItem("heute_pub");
+      throw new Error("worker: " + r.status + " " + (await r.text()).slice(0, 120));
+    }
+    return "live geschaltet — in ~1 min sichtbar.";
+  }
+  // no worker configured -> hand over the finished file to commit manually
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = "index.html";
+  document.body.append(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  return "index.html heruntergeladen — 1 commit und es ist live.";
+}
+
+$("addform").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const videoId = parseYt($("add-yt").value);
+  const file = $("add-file").value.trim();
+  const persons = splitList($("add-persons").value);
+  const games = splitList($("add-games").value);
+
+  if (!videoId && !file) return setAddStatus("youtube-url oder datei-url angeben.", "err");
+  if ($("add-yt").value.trim() && !videoId) return setAddStatus("youtube-url nicht erkannt.", "err");
+  if (!persons.length) return setAddStatus("mindestens einen spieler angeben.", "err");
+  if (!games.length) return setAddStatus("mindestens ein game angeben.", "err");
+
+  const v = {
+    id: Math.max(0, ...VIDEOS.map(x => x.id)) + 1,
+    persons, games, uploaded: todayISO(),
+  };
+  if (videoId) v.videoId = videoId;
+  if (file) v.file = file;
+
+  const submit = $("add-submit");
+  submit.disabled = true;
+  setAddStatus("verschlüssle & veröffentliche…");
+
+  VIDEOS.push(v);
+  try {
+    const html = await buildNewIndexHtml(await rebuildBlob());
+    const msg = await publish(html);
+    setAddStatus("heute " + v.id + " hinzugefügt. " + msg, "ok");
+    renderCards("");
+    $("search").value = "";
+    setTimeout(closeAdd, 1400);
+  } catch (err) {
+    VIDEOS.pop(); // roll back the optimistic add
+    setAddStatus("fehlgeschlagen: " + err.message, "err");
+  } finally {
+    submit.disabled = false;
   }
 });
 </script>

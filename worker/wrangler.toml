@@ -1,0 +1,8 @@
+name = "heute-publish"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+REPO = "rquw/Heute"
+BRANCH = "main"
+PATH = "index.html"
