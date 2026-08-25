@@ -72,6 +72,7 @@
     transition: border-color var(--ease), background var(--ease);
   }
 
+  #gate-input:disabled { opacity: 0.6; }
   #gate-input::placeholder { color: #bbb; letter-spacing: 1px; }
   #gate-input:focus { border-color: #ccc; background: #fff; }
 
@@ -210,7 +211,7 @@
     display: block;
   }
 
-  /* shown through/behind the image only when the frame fails to load */
+  /* shown behind the image only when the frame fails to load */
   .thumb-label {
     font-size: 28px;
     font-weight: 800;
@@ -404,22 +405,59 @@
 
 const $ = (id) => document.getElementById(id);
 
-/* ============================ gate ============================ */
+/* ============================ encrypted payload ============================ */
+/* AES-256-GCM ciphertext. Without a valid password there is nothing here but
+   noise — the video ids, names and games only exist once decrypted. Regenerate
+   with build/encrypt.mjs (or encrypt.html) when passwords or data change.       */
 
-const GATE_HASHES = new Set([
-  "1b879216dc17755c07c11fd2b7e15dd8df5ef7f8c0a3f27e1c6f0ddb4d2c03b6",
-  "46ddd8196f72b3e629511ce5c746aaaa82d53df3f9a3e8831d653bbb04ccf13e",
-  "6e65b61d030e5ac6492802c6f619a63006e5b0e2cafc0170ab92a68083162528",
-  "85d6385b945c0d602103db39b0b654b2af93b5127938e26a959c123f0789b948",
-  "5ad4fca71d720f79036d7ba27b999f6a423d69b57877558d43e5d6bdd7b7a8a9",
-  "75992a5ac67ff644d3063976c2effd10bdd93fcc109798e3d5c1acf2e530d01a",
-  "f9c6f275600d0a3a06264cca302f245e442e2f5d7283d16eab7f555735519916",
-]);
+const BLOB = {"v":1,"iter":310000,"iv":"d8sWf4kZhBVj3Qau","ct":"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","wraps":[{"salt":"AQKNAzaa2sN/4o1if2r+yQ==","iv":"BqUVAHhJ162ARo35","key":"NaPgozuHxHsE+fHCQ1QpPf8BYpeEgaS1zSyuUpLjnONvM7SKsueAxKfbnuuy4o4H"},{"salt":"c+2SVIVKN3mvT3+KZ6jMtg==","iv":"nqy/YQa5wIKeFhn2","key":"Ghi14dxrbWsm6O4GKXdXz9BFVHw3vm8QjMUXfuY/kpOkMwJbaEm5k5PigwbiYGsu"},{"salt":"YHxzw3gzwF52vDB3XGwgfA==","iv":"g6XyuHLgxIofYWkC","key":"FdRPiny7fayasMVABBpYXPOtjs94PSuegrrXpaTzd0JRKj47fTGkOu4fhlNbKghe"},{"salt":"pV1781pnLqMRrSMD8XghHQ==","iv":"2VG0Z3s/aytkLoag","key":"c+GBJr8gmlbl6pCYdaNZDWp/ktRhvZQQ39KaJm0naRO7d4JcAh6hgWYElVUXyf2V"},{"salt":"J8ayj/UWIgc55QCUKkunEQ==","iv":"WytfhUtkBzd5Yk4c","key":"1ME0ne2ppcz8VCuPpOZ3IPQqGuTrFxJrwkxYrb4vorC5O5V13xcJ4LhRCJ/qRTsH"},{"salt":"ObYvH/ErXU93t9pchQOZig==","iv":"Vlt29Wn9JVG//j4B","key":"O7CfxGXRP6saEHTPzD9m3P1xaKl8M7RIHepf8eeLnRsX3qhhUaZBxEVkRBP4TcfL"}]};
 
-async function sha256Hex(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+/* ============================ crypto ============================ */
+
+const b64ToBytes = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+async function deriveKek(password, salt) {
+  const base = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: BLOB.iter, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
 }
+
+// returns the decoded payload object, or null if the password fits no wrap
+async function decryptPayload(password) {
+  for (const w of BLOB.wraps) {
+    try {
+      const kek = await deriveKek(password, b64ToBytes(w.salt));
+      const rawKey = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: b64ToBytes(w.iv) }, kek, b64ToBytes(w.key));
+      const contentKey = await crypto.subtle.importKey(
+        "raw", rawKey, "AES-GCM", false, ["decrypt"]);
+      const plain = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: b64ToBytes(BLOB.iv) }, contentKey, b64ToBytes(BLOB.ct));
+      return JSON.parse(new TextDecoder().decode(plain));
+    } catch {
+      // wrong password for this wrap (GCM tag mismatch) — try the next one
+    }
+  }
+  return null;
+}
+
+/* ============================ data (filled after unlock) ============================ */
+
+let PEOPLE = {};
+let VIDEOS = [];
+
+const realName = (p) => PEOPLE[p]?.real || "?";
+const aliasesOf = (p) => PEOPLE[p]?.aka || [];
+const videoTitle = (v) => v.games.join(", ");
+
+// youtube serves the opening frame at maxresdefault; mqdefault is the
+// low-res fallback for videos that have no maxres rendition
+const frameUrl = (videoId, quality = "maxresdefault") =>
+  `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`;
+
+/* ============================ gate ============================ */
 
 function showGateError() {
   const input = $("gate-input");
@@ -430,7 +468,9 @@ function showGateError() {
   input.value = "";
 }
 
-function unlockSite() {
+function unlockSite(payload) {
+  PEOPLE = payload.people;
+  VIDEOS = payload.videos;
   document.body.classList.remove("locked");
   $("gate").hidden = true;
   renderCards("");
@@ -439,68 +479,20 @@ function unlockSite() {
 
 $("gate-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const value = $("gate-input").value;
-  if (value && GATE_HASHES.has(await sha256Hex(value))) unlockSite();
-  else showGateError();
+  const input = $("gate-input");
+  const value = input.value;
+  if (!value) return;
+
+  input.disabled = true;
+  const payload = await decryptPayload(value); // PBKDF2 is intentionally slow
+  input.disabled = false;
+
+  if (payload) unlockSite(payload);
+  else { showGateError(); input.focus(); }
 });
 
 $("gate-input").addEventListener("input", () => $("gate-error").classList.remove("show"));
 $("gate-input").focus();
-
-/* ============================ data ============================ */
-
-const PEOPLE = {
-  rquw:      "Fabio",
-  CloudMelt: "Chrisi",
-  Zaykee:    "Niki",
-  Cookeey:   "Jaks",
-  XRClon:    "Xaver",
-  Kit:       "Martin",
-  Todoroki:  "Nao",
-};
-
-const VIDEOS = [
-  { id: 1,  videoId: "GgY-qG66mRI", persons: ["rquw", "CloudMelt", "XRClon"],
-    games: ["Wobbly Life", "Minecraft Bedwars", "Roblox Rivals"] },
-  { id: 2,  videoId: "7BeJxzEZVz0", persons: ["rquw", "XRClon"],
-    games: ["Roblox Rivals"] },
-  { id: 3,  videoId: "-GqyFOPw3QU", persons: ["rquw", "CloudMelt", "Zaykee", "XRClon", "Kit"],
-    games: ["Make It Meme", "Richup", "Roblox Rivals", "Minecraft"] },
-  { id: 4,  videoId: "jJZ6pZ5v80c", persons: ["rquw", "CloudMelt", "Zaykee", "XRClon"],
-    games: ["Piko Park"] },
-  { id: 5,  videoId: "iY3rKzpOrvc", persons: ["rquw", "CloudMelt", "Zaykee"],
-    games: ["Minecraft Survival", "Cookee", "Todoroki2009"] },
-  { id: 6,  videoId: "fjtYULoGSzo", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
-    games: ["Minecraft Survival"] },
-  { id: 7,  videoId: "rTbi1m5G4ig", persons: ["rquw", "CloudMelt", "Zaykee", "XRClon"],
-    games: ["Minecraft Survival"] },
-  { id: 8,  videoId: "QQPmDQPha2k", persons: ["rquw", "CloudMelt"],
-    games: ["Minecraft Survival"] },
-  { id: 9,  videoId: "GH9lQULIt9o", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
-    games: ["Minecraft Survival"] },
-  { id: 10, videoId: "cBykPOuAwr4", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey"],
-    games: ["Minecraft Bedwars", "Minecraft Creative", "Fortnite"] },
-  { id: 11, videoId: "VrbcR2ZBbyA", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon", "Kit", "Todoroki"],
-    games: ["Fortnite", "Minecraft Bedwars", "Minecraft Skywars", "Among Us"] },
-  { id: 12, videoId: "F3VUL6C5rFY", persons: ["rquw", "CloudMelt", "Zaykee", "Todoroki"],
-    games: ["Roblox Rivals", "Roblox Desert"] },
-  { id: 13, videoId: "Y7DTQwOMN8A", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "Kit"],
-    games: ["rv there yet?"] },
-  { id: 14, videoId: "fwY00FFB1yc", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
-    games: ["Rounds", "Rocket League", "Minecraft Survival"] },
-  { id: 15, videoId: "5taV9lOyoro", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
-    games: ["Minecraft"] },
-  { id: 16, videoId: "-EKAeiQqwzY", persons: ["rquw", "CloudMelt", "Cookeey", "Kit", "XRClon"],
-    games: ["Minecraft", "Backrooms"] },
-];
-
-const realName = (person) => PEOPLE[person] || "?";
-const videoTitle = (v) => v.games.join(", ");
-
-// youtube serves the opening frame at maxresdefault; mqdefault is the
-// low-res fallback for videos that have no maxres rendition
-const frameUrl = (videoId, quality = "maxresdefault") =>
-  `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`;
 
 /* ============================ search ============================ */
 
@@ -516,7 +508,8 @@ function matchesToken(v, token) {
 
   // word-prefix match instead of includes-anywhere, so "it" doesn't hit "Fortnite" or "Kit"
   const hit = (str) => wordsOf(str).some(w => w.startsWith(t));
-  return v.persons.some(p => hit(p) || hit(realName(p))) || v.games.some(hit);
+  const personHit = (p) => hit(p) || hit(realName(p)) || aliasesOf(p).some(hit);
+  return v.persons.some(personHit) || v.games.some(hit);
 }
 
 const matches = (v, q) =>
