@@ -5,23 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>heute.</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>">
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://www.youtube-nocookie.com">
 <style>
   :root {
     --bg: #0e0e0e;
     --surface: #171717;
     --border: #2a2a2a;
+    --border-hi: #444;
     --text: #f0f0f0;
     --muted: #666;
     --radius: 10px;
+    --maxw: 900px;
+    --ease: 0.2s ease;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body {
-    background: var(--bg);
-  }
+  html { background: var(--bg); }
 
   body {
+    background: var(--bg);
     color: var(--text);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     min-height: 100vh;
@@ -32,19 +36,19 @@
 
   body.locked > *:not(#gate) { display: none !important; }
 
+  /* ---------- gate ---------- */
+
   #gate {
     position: fixed;
     inset: 0;
-    background: #ffffff;
     z-index: 9999;
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: 18px;
   }
 
-  #gate.hidden { display: none; }
+  #gate[hidden] { display: none; }
 
   #gate-form {
     display: flex;
@@ -55,54 +59,49 @@
 
   #gate-input {
     width: 260px;
+    padding: 15px 18px;
     text-align: center;
+    font-family: inherit;
     font-size: 17px;
     letter-spacing: 3px;
-    padding: 15px 18px;
-    border: 1px solid #e2e2e2;
-    border-radius: 10px;
-    outline: none;
     color: #222;
     background: #fbfbfb;
-    font-family: inherit;
-    transition: border-color 0.2s, background 0.2s;
+    border: 1px solid #e2e2e2;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color var(--ease), background var(--ease);
   }
 
-  #gate-input::placeholder {
-    color: #bbb;
-    letter-spacing: 1px;
-  }
-
-  #gate-input:focus {
-    border-color: #ccc;
-    background: #ffffff;
-  }
+  #gate-input::placeholder { color: #bbb; letter-spacing: 1px; }
+  #gate-input:focus { border-color: #ccc; background: #fff; }
 
   #gate-input.shake {
-    animation: gate-shake 0.35s ease;
     border-color: #e08080;
+    animation: shake 0.35s ease;
   }
 
-  @keyframes gate-shake {
+  @keyframes shake {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-8px); }
     40%, 80% { transform: translateX(8px); }
   }
 
-  .gate-error {
-    font-size: 12px;
-    color: #c0392b;
+  #gate-error {
     height: 14px;
-    opacity: 0;
-    transition: opacity 0.2s;
+    font-size: 12px;
     letter-spacing: 0.3px;
+    color: #c0392b;
+    opacity: 0;
+    transition: opacity var(--ease);
   }
 
-  .gate-error.show { opacity: 1; }
+  #gate-error.show { opacity: 1; }
+
+  /* ---------- header + search ---------- */
 
   header {
     width: 100%;
-    max-width: 900px;
+    max-width: var(--maxw);
     padding: 60px 24px 24px;
     text-align: center;
   }
@@ -111,46 +110,47 @@
     font-size: 52px;
     font-weight: 800;
     letter-spacing: -2px;
-    color: var(--text);
   }
 
   .search-wrap {
-    width: 100%;
-    max-width: 900px;
-    padding: 0 24px 32px;
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
+    max-width: var(--maxw);
+    padding: 16px 24px 32px;
     background: linear-gradient(var(--bg) 85%, transparent);
-    padding-top: 16px;
   }
 
   #search {
     width: 100%;
+    padding: 14px 18px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    color: var(--text);
-    font-size: 15px;
-    padding: 14px 18px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color var(--ease);
   }
 
   #search::placeholder { color: var(--muted); }
-  #search:focus { border-color: #444; }
+  #search:focus { border-color: var(--border-hi); }
 
   .results-info {
-    max-width: 900px;
     width: 100%;
+    max-width: var(--maxw);
     padding: 0 24px 16px;
-    color: var(--muted);
     font-size: 13px;
+    color: var(--muted);
   }
+
+  /* ---------- grid + cards ---------- */
 
   .grid {
     width: 100%;
-    max-width: 900px;
+    max-width: var(--maxw);
     padding: 0 24px 80px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -160,23 +160,29 @@
   .grid.single-result { grid-template-columns: 1fr; }
 
   .card {
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
-    position: relative;
+    transition: border-color var(--ease), transform var(--ease);
   }
 
-  .card:hover { border-color: #444; transform: translateY(-2px); }
+  .card:hover,
+  .card:focus-visible { border-color: var(--border-hi); transform: translateY(-2px); }
+  .card:focus-visible { outline: 2px solid #5a5aff; outline-offset: 2px; }
 
   .card.spotlight {
-    animation: spotlight-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     grid-column: 1 / -1;
     max-width: 700px;
     margin: 0 auto;
-    width: 100%;
+    animation: spotlight-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   @keyframes spotlight-in {
@@ -185,25 +191,33 @@
   }
 
   .thumb {
-    aspect-ratio: 16/9;
-    background: #111;
     position: relative;
-    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #111;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
   }
 
+  /* first frame of the video; sits above the fallback label */
+  .thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* shown through/behind the image only when the frame fails to load */
   .thumb-label {
     font-size: 28px;
     font-weight: 800;
     letter-spacing: -1px;
     color: #2a2a2a;
     user-select: none;
-    transition: color 0.2s;
   }
-
-  .card:hover .thumb-label { color: #333; }
 
   .play-overlay {
     position: absolute;
@@ -211,38 +225,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity var(--ease);
   }
-  .card:hover .play-overlay { opacity: 1; }
 
-  .play-overlay svg { width: 48px; height: 48px; fill: white; }
+  .card:hover .play-overlay,
+  .card:focus-visible .play-overlay { opacity: 1; }
+
+  .play-overlay svg { width: 48px; height: 48px; fill: #fff; }
 
   .card-body { padding: 14px 16px; }
 
   .card-num {
+    margin-bottom: 4px;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1px;
-    color: var(--muted);
     text-transform: uppercase;
-    margin-bottom: 4px;
+    color: var(--muted);
   }
 
   .card-title {
+    margin-bottom: 8px;
     font-size: 14px;
     font-weight: 600;
-    color: var(--text);
-    margin-bottom: 8px;
     line-height: 1.3;
   }
+
+  /* ---------- tags ---------- */
 
   .tags { display: flex; flex-wrap: wrap; gap: 5px; }
 
   .tag {
-    font-size: 11px;
     padding: 3px 8px;
+    font-size: 11px;
     border-radius: 4px;
     background: #222;
     color: #999;
@@ -252,15 +269,16 @@
   .tag.person { background: #1a1a2e; color: #8888cc; border-color: #2a2a4a; }
   .tag.game   { background: #1a2a1a; color: #77aa77; border-color: #2a3a2a; }
 
+  /* ---------- modal ---------- */
+
   .modal-bg {
-    display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.92);
     z-index: 1000;
+    display: none;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+    background: rgba(0, 0, 0, 0.92);
   }
 
   .modal-bg.open { display: flex; }
@@ -275,32 +293,40 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 0 0 14px;
+    gap: 16px;
+    padding-bottom: 14px;
   }
 
-  .modal-num { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .modal-num {
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .modal-title { margin-top: 2px; font-size: 18px; font-weight: 700; }
 
   .close-btn {
-    background: none;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 20px;
+    flex-shrink: 0;
     width: 40px;
     height: 40px;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.2s, color 0.2s;
-    flex-shrink: 0;
+    font-size: 20px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #333;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color var(--ease), color var(--ease);
   }
-  .close-btn:hover { border-color: #666; color: var(--text); }
+
+  .close-btn:hover { border-color: var(--muted); color: var(--text); }
 
   .player-wrap {
     width: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 16 / 9;
     background: #000;
     border-radius: var(--radius);
     overflow: hidden;
@@ -313,14 +339,24 @@
     display: block;
   }
 
-  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; padding-bottom: 20px; }
+  .modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 0 20px;
+  }
 
   .no-results {
-    grid-column: 1/-1;
-    text-align: center;
-    color: var(--muted);
+    grid-column: 1 / -1;
     padding: 60px 0;
+    text-align: center;
     font-size: 15px;
+    color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .card:hover { transform: none; }
   }
 </style>
 </head>
@@ -328,35 +364,35 @@
 
 <div id="gate">
   <form id="gate-form" autocomplete="off">
-    <input id="gate-input" type="password" placeholder="passwort" autocomplete="off" autofocus />
-    <div class="gate-error" id="gate-error">falsch.</div>
+    <input id="gate-input" type="password" placeholder="passwort" autocomplete="off" aria-label="passwort">
+    <div id="gate-error" role="alert">falsch.</div>
   </form>
 </div>
 
 <header><h1>heute.</h1></header>
 
 <div class="search-wrap">
-  <input id="search" type="text" placeholder="suche nach video, person, spiel… mehrere tags mit leerzeichen trennen" autocomplete="off" />
+  <input id="search" type="search" autocomplete="off" aria-label="suche"
+         placeholder="suche nach video, person, spiel… mehrere tags mit leerzeichen trennen">
 </div>
 
-<div class="results-info" id="results-info"></div>
+<div class="results-info" id="results-info" aria-live="polite"></div>
 <div class="grid" id="grid"></div>
 
-<div class="modal-bg" id="modal">
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal">
     <div class="modal-header">
       <div>
         <div class="modal-num" id="modal-num"></div>
         <div class="modal-title" id="modal-title"></div>
       </div>
-      <button class="close-btn" onclick="closeModal()">×</button>
+      <button class="close-btn" id="close-btn" aria-label="schließen">×</button>
     </div>
 
     <div class="player-wrap">
-      <iframe id="player-iframe"
+      <iframe id="player-iframe" title="video"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-        allowfullscreen>
-      </iframe>
+        allowfullscreen></iframe>
     </div>
 
     <div class="modal-tags" id="modal-tags"></div>
@@ -364,6 +400,12 @@
 </div>
 
 <script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+
+/* ============================ gate ============================ */
+
 const GATE_HASHES = new Set([
   "1b879216dc17755c07c11fd2b7e15dd8df5ef7f8c0a3f27e1c6f0ddb4d2c03b6",
   "46ddd8196f72b3e629511ce5c746aaaa82d53df3f9a3e8831d653bbb04ccf13e",
@@ -375,203 +417,239 @@ const GATE_HASHES = new Set([
 ]);
 
 async function sha256Hex(str) {
-  const enc = new TextEncoder().encode(str);
-  const buf = await crypto.subtle.digest("SHA-256", enc);
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function tryUnlock(value) {
-  if (!value) return false;
-  const hash = await sha256Hex(value);
-  return GATE_HASHES.has(hash);
+function showGateError() {
+  const input = $("gate-input");
+  $("gate-error").classList.add("show");
+  input.classList.remove("shake");
+  void input.offsetWidth; // restart the animation
+  input.classList.add("shake");
+  input.value = "";
 }
 
 function unlockSite() {
   document.body.classList.remove("locked");
-  document.getElementById("gate").classList.add("hidden");
-  startApp();
+  $("gate").hidden = true;
+  renderCards("");
+  $("search").focus();
 }
 
-function showGateError() {
-  const input = document.getElementById("gate-input");
-  const err = document.getElementById("gate-error");
-  err.classList.add("show");
-  input.classList.remove("shake");
-  void input.offsetWidth;
-  input.classList.add("shake");
-  input.value = "";
-  setTimeout(() => input.classList.remove("shake"), 350);
-}
-
-document.getElementById("gate-form").addEventListener("submit", async (e) => {
+$("gate-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const input = document.getElementById("gate-input");
-  const ok = await tryUnlock(input.value);
-  if (ok) {
-    unlockSite();
-  } else {
-    showGateError();
-  }
+  const value = $("gate-input").value;
+  if (value && GATE_HASHES.has(await sha256Hex(value))) unlockSite();
+  else showGateError();
 });
 
-document.getElementById("gate-input").addEventListener("input", () => {
-  document.getElementById("gate-error").classList.remove("show");
-});
+$("gate-input").addEventListener("input", () => $("gate-error").classList.remove("show"));
+$("gate-input").focus();
 
-document.getElementById("gate-input").focus();
+/* ============================ data ============================ */
+
+const PEOPLE = {
+  rquw:      "Fabio",
+  CloudMelt: "Chrisi",
+  Zaykee:    "Niki",
+  Cookeey:   "Jaks",
+  XRClon:    "Xaver",
+  Kit:       "Martin",
+  Todoroki:  "Nao",
+};
 
 const VIDEOS = [
-  { id:1,  videoId:"GgY-qG66mRI", persons:["rquw","CloudMelt","XRClon"],                                                    realNames:["Fabio","Chrisi","Xaver"],                             games:["Wobbly Life","Minecraft Bedwars","Roblox Rivals"] },
-  { id:2,  videoId:"7BeJxzEZVz0", persons:["rquw","XRClon"],                                                    realNames:["Fabio","Xaver"],                             games:["Roblox Rivals"] },
-  { id:3,  videoId:"-GqyFOPw3QU", persons:["rquw","CloudMelt","Zaykee","XRClon","Kit"],                        realNames:["Fabio","Chrisi","Niki","Xaver","Martin"],     games:["Make It Meme","Richup","Roblox Rivals","Minecraft"] },
-  { id:4,  videoId:"jJZ6pZ5v80c", persons:["rquw","CloudMelt","Zaykee","XRClon"],                               realNames:["Fabio","Chrisi","Niki","Xaver"],              games:["Piko Park"] },
-  { id:5,  videoId:"iY3rKzpOrvc", persons:["rquw","CloudMelt","Zaykee"],                                        realNames:["Fabio","Chrisi","Niki"],                      games:["Minecraft Survival","Cookee","Todoroki2009"] },
-  { id:6,  videoId:"fjtYULoGSzo", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Minecraft Survival"] },
-  { id:7,  videoId:"rTbi1m5G4ig", persons:["rquw","CloudMelt","Zaykee","XRClon"],                               realNames:["Fabio","Chrisi","Niki","Xaver"],              games:["Minecraft Survival"] },
-  { id:8,  videoId:"QQPmDQPha2k", persons:["rquw","CloudMelt"],                                                 realNames:["Fabio","Chrisi"],                             games:["Minecraft Survival"] },
-  { id:9,  videoId:"GH9lQULIt9o", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Minecraft Survival"] },
-  { id:10, videoId:"cBykPOuAwr4", persons:["rquw","CloudMelt","Zaykee","Cookeey"],                              realNames:["Fabio","Chrisi","Niki","Jaks"],               games:["Minecraft Bedwars","Minecraft Creative","Fortnite"] },
-  { id:11, videoId:"VrbcR2ZBbyA", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon","Kit","Todoroki"],   realNames:["Fabio","Chrisi","Niki","Jaks","Xaver","Martin","Nao"], games:["Fortnite","Minecraft Bedwars","Minecraft Skywars","Among Us"] },
-  { id:12, videoId:"F3VUL6C5rFY", persons:["rquw","CloudMelt","Zaykee","Todoroki"],                             realNames:["Fabio","Chrisi","Niki","Nao"],                games:["Roblox Rivals","Roblox Desert"] },
-  { id:13, videoId:"Y7DTQwOMN8A", persons:["rquw","CloudMelt","Zaykee","Cookeey","Kit"],                        realNames:["Fabio","Chrisi","Niki","Jaks","Kit"],          games:["rv there yet?"] },
-  { id:14, videoId:"fwY00FFB1yc", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Rounds","Rocket League","Minecraft Survival"] },
-  { id:15, videoId:"5taV9lOyoro", persons:["rquw","CloudMelt","Zaykee","Cookeey","XRClon"],                     realNames:["Fabio","Chrisi","Niki","Jaks","Xaver"],       games:["Minecraft"] },
-  { id:16, videoId:"-EKAeiQqwzY", persons:["rquw","CloudMelt","Cookeey","Kit","XRClon"],                     realNames:["Fabio","Chrisi","Jaks","Martin","Xaver"],       games:["Minecraft", "Backrooms"] },
+  { id: 1,  videoId: "GgY-qG66mRI", persons: ["rquw", "CloudMelt", "XRClon"],
+    games: ["Wobbly Life", "Minecraft Bedwars", "Roblox Rivals"] },
+  { id: 2,  videoId: "7BeJxzEZVz0", persons: ["rquw", "XRClon"],
+    games: ["Roblox Rivals"] },
+  { id: 3,  videoId: "-GqyFOPw3QU", persons: ["rquw", "CloudMelt", "Zaykee", "XRClon", "Kit"],
+    games: ["Make It Meme", "Richup", "Roblox Rivals", "Minecraft"] },
+  { id: 4,  videoId: "jJZ6pZ5v80c", persons: ["rquw", "CloudMelt", "Zaykee", "XRClon"],
+    games: ["Piko Park"] },
+  { id: 5,  videoId: "iY3rKzpOrvc", persons: ["rquw", "CloudMelt", "Zaykee"],
+    games: ["Minecraft Survival", "Cookee", "Todoroki2009"] },
+  { id: 6,  videoId: "fjtYULoGSzo", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
+    games: ["Minecraft Survival"] },
+  { id: 7,  videoId: "rTbi1m5G4ig", persons: ["rquw", "CloudMelt", "Zaykee", "XRClon"],
+    games: ["Minecraft Survival"] },
+  { id: 8,  videoId: "QQPmDQPha2k", persons: ["rquw", "CloudMelt"],
+    games: ["Minecraft Survival"] },
+  { id: 9,  videoId: "GH9lQULIt9o", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
+    games: ["Minecraft Survival"] },
+  { id: 10, videoId: "cBykPOuAwr4", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey"],
+    games: ["Minecraft Bedwars", "Minecraft Creative", "Fortnite"] },
+  { id: 11, videoId: "VrbcR2ZBbyA", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon", "Kit", "Todoroki"],
+    games: ["Fortnite", "Minecraft Bedwars", "Minecraft Skywars", "Among Us"] },
+  { id: 12, videoId: "F3VUL6C5rFY", persons: ["rquw", "CloudMelt", "Zaykee", "Todoroki"],
+    games: ["Roblox Rivals", "Roblox Desert"] },
+  { id: 13, videoId: "Y7DTQwOMN8A", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "Kit"],
+    games: ["rv there yet?"] },
+  { id: 14, videoId: "fwY00FFB1yc", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
+    games: ["Rounds", "Rocket League", "Minecraft Survival"] },
+  { id: 15, videoId: "5taV9lOyoro", persons: ["rquw", "CloudMelt", "Zaykee", "Cookeey", "XRClon"],
+    games: ["Minecraft"] },
+  { id: 16, videoId: "-EKAeiQqwzY", persons: ["rquw", "CloudMelt", "Cookeey", "Kit", "XRClon"],
+    games: ["Minecraft", "Backrooms"] },
 ];
 
-let currentVideo = null;
+const realName = (person) => PEOPLE[person] || "?";
+const videoTitle = (v) => v.games.join(", ");
 
-// splits a tag string into lowercase words, e.g. "Make It Meme" -> ["make","it","meme"]
-// returns [] for missing/undefined so a data typo (mismatched persons/realNames length) can't crash search
-function wordsOf(str) {
-  if (!str) return [];
-  return String(str).toLowerCase().split(/\s+/).filter(Boolean);
-}
+// youtube serves the opening frame at maxresdefault; mqdefault is the
+// low-res fallback for videos that have no maxres rendition
+const frameUrl = (videoId, quality = "maxresdefault") =>
+  `https://i.ytimg.com/vi/${videoId}/${quality}.jpg`;
+
+/* ============================ search ============================ */
+
+// "Make It Meme" -> ["make","it","meme"]
+const wordsOf = (str) => String(str || "").toLowerCase().split(/\s+/).filter(Boolean);
 
 function matchesToken(v, token) {
   const t = token.toLowerCase();
-  if (!t) return true;
-  const numMatch = t.match(/^(?:heute\s*)?(\d+)$/);
-  if (numMatch && parseInt(numMatch[1]) === v.id) return true;
-  if (t === 'heute') return true;
+  if (!t || t === "heute") return true;
+
+  const num = t.match(/^(?:heute\s*)?(\d+)$/);
+  if (num && Number(num[1]) === v.id) return true;
 
   // word-prefix match instead of includes-anywhere, so "it" doesn't hit "Fortnite" or "Kit"
-  for (let i = 0; i < v.persons.length; i++) {
-    if (wordsOf(v.persons[i]).some(w => w.startsWith(t))) return true;
-    if (wordsOf(v.realNames[i]).some(w => w.startsWith(t))) return true;
-  }
-  for (const g of v.games) {
-    if (wordsOf(g).some(w => w.startsWith(t))) return true;
-  }
-  return false;
+  const hit = (str) => wordsOf(str).some(w => w.startsWith(t));
+  return v.persons.some(p => hit(p) || hit(realName(p))) || v.games.some(hit);
 }
 
-function matches(v, q) {
-  const tokens = q.trim().split(/\s+/).filter(Boolean);
-  if (!tokens.length) return true;
-  return tokens.every(tok => matchesToken(v, tok));
+const matches = (v, q) =>
+  q.trim().split(/\s+/).filter(Boolean).every(tok => matchesToken(v, tok));
+
+/* ============================ rendering ============================ */
+
+const escapeHtml = (str) =>
+  String(str).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const personTag = (p, withReal) =>
+  `<span class="tag person"${withReal ? "" : ` title="${escapeHtml(realName(p))}"`}>` +
+  escapeHtml(withReal ? `${p} (${realName(p)})` : p) + `</span>`;
+
+const gameTag = (g) => `<span class="tag game">${escapeHtml(g)}</span>`;
+
+function buildThumb(v) {
+  const thumb = document.createElement("div");
+  thumb.className = "thumb";
+  thumb.innerHTML = `
+    <span class="thumb-label">heute ${v.id}</span>
+    <div class="play-overlay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>`;
+
+  const img = document.createElement("img");
+  img.src = frameUrl(v.videoId);
+  img.alt = `erster frame von heute ${v.id}`;
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.addEventListener("error", () => {
+    // maxres missing -> try the low-res frame once, then fall back to the label
+    if (img.dataset.retried) img.remove();
+    else { img.dataset.retried = "1"; img.src = frameUrl(v.videoId, "mqdefault"); }
+  });
+  thumb.prepend(img);
+
+  return thumb;
 }
 
-function buildTitle(v) { return v.games.join(', '); }
+function buildCard(v, spotlight) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "card" + (spotlight ? " spotlight" : "");
+  card.addEventListener("click", () => openModal(v));
+
+  const body = document.createElement("div");
+  body.className = "card-body";
+  body.innerHTML = `
+    <div class="card-num">heute ${v.id}</div>
+    <div class="card-title">${escapeHtml(videoTitle(v))}</div>
+    <div class="tags">
+      ${v.persons.map(p => personTag(p, false)).join("")}
+      ${v.games.map(gameTag).join("")}
+    </div>`;
+
+  card.append(buildThumb(v), body);
+  return card;
+}
 
 function renderCards(q) {
+  const grid = $("grid");
+  const info = $("results-info");
   const filtered = VIDEOS.filter(v => matches(v, q));
-  const grid = document.getElementById('grid');
-  const info = document.getElementById('results-info');
-  grid.innerHTML = '';
 
-  const single = filtered.length === 1;
-  grid.className = 'grid' + (single ? ' single-result' : '');
+  grid.replaceChildren();
 
   if (!filtered.length) {
+    grid.className = "grid";
     grid.innerHTML = '<div class="no-results">nichts gefunden.</div>';
-    info.textContent = '';
+    info.textContent = "";
     return;
   }
 
-  info.textContent = q.trim()
-    ? (filtered.length === VIDEOS.length ? `alle ${VIDEOS.length} videos` : `${filtered.length} von ${VIDEOS.length} videos`)
-    : `${VIDEOS.length} videos`;
+  const single = filtered.length === 1;
+  grid.className = "grid" + (single ? " single-result" : "");
+  info.textContent = filtered.length === VIDEOS.length
+    ? `${VIDEOS.length} videos`
+    : `${filtered.length} von ${VIDEOS.length} videos`;
 
-  for (const v of filtered) {
-    const card = document.createElement('div');
-    card.className = 'card' + (single ? ' spotlight' : '');
-    card.onclick = () => openModal(v);
-    card.innerHTML = `
-      <div class="thumb">
-        <span class="thumb-label">heute ${v.id}</span>
-        <div class="play-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-      </div>
-      <div class="card-body">
-        <div class="card-num">heute ${v.id}</div>
-        <div class="card-title">${buildTitle(v)}</div>
-        <div class="tags">
-          ${v.persons.map((p,i) => `<span class="tag person" title="${v.realNames[i] || ''}">${p}</span>`).join('')}
-          ${v.games.map(g => `<span class="tag game">${g}</span>`).join('')}
-        </div>
-      </div>`;
-    grid.appendChild(card);
-  }
+  grid.append(...filtered.map(v => buildCard(v, single)));
+}
+
+/* ============================ modal ============================ */
+
+let ytPaused = false;
+
+function postToPlayer(func) {
+  $("player-iframe").contentWindow.postMessage(
+    JSON.stringify({ event: "command", func, args: "" }), "*");
 }
 
 function openModal(v) {
-  currentVideo = v;
+  ytPaused = false;
 
-  document.getElementById('modal-num').textContent = `HEUTE ${v.id}`;
-  document.getElementById('modal-title').textContent = buildTitle(v);
-  document.getElementById('modal-tags').innerHTML =
-    v.persons.map((p,i) => `<span class="tag person">${p} (${v.realNames[i] || '?'})</span>`).join('') +
-    v.games.map(g => `<span class="tag game">${g}</span>`).join('');
+  $("modal-num").textContent = `HEUTE ${v.id}`;
+  $("modal-title").textContent = videoTitle(v);
+  $("modal-tags").innerHTML =
+    v.persons.map(p => personTag(p, true)).join("") + v.games.map(gameTag).join("");
 
-  const iframe = document.getElementById('player-iframe');
-  iframe.src = `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
+  $("player-iframe").src =
+    `https://www.youtube-nocookie.com/embed/${v.videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
 
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  $("modal").classList.add("open");
+  document.body.style.overflow = "hidden";
 }
 
 function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
-  document.getElementById('player-iframe').src = '';
-  currentVideo = null;
-  renderCards(document.getElementById('search').value);
+  $("modal").classList.remove("open");
+  $("player-iframe").src = "about:blank"; // stops playback; "" would reload this page into the frame
+  document.body.style.overflow = "";
 }
 
-document.addEventListener('keydown', (e) => {
-  const isOpen = document.getElementById('modal').classList.contains('open');
-  if (e.key === 'Escape' && isOpen) { closeModal(); return; }
-  if (!isOpen || document.activeElement.tagName === 'INPUT') return;
-  const iframe = document.getElementById('player-iframe');
-  if (e.key === ' ' || e.code === 'Space') {
+const modalIsOpen = () => $("modal").classList.contains("open");
+
+$("close-btn").addEventListener("click", closeModal);
+$("modal").addEventListener("click", (e) => { if (e.target === $("modal")) closeModal(); });
+$("search").addEventListener("input", (e) => renderCards(e.target.value));
+
+document.addEventListener("keydown", (e) => {
+  if (!modalIsOpen()) return;
+
+  if (e.key === "Escape") { closeModal(); return; }
+  if (document.activeElement.tagName === "INPUT") return;
+
+  if (e.code === "Space") {
     e.preventDefault();
-    if (!window._ytPaused) {
-      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-      window._ytPaused = true;
-    } else {
-      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      window._ytPaused = false;
-    }
-  }
-  if (e.key === 'f' || e.key === 'F') {
-    const pw = document.querySelector('.player-wrap');
+    postToPlayer(ytPaused ? "playVideo" : "pauseVideo");
+    ytPaused = !ytPaused;
+  } else if (e.key.toLowerCase() === "f") {
     if (document.fullscreenElement) document.exitFullscreen();
-    else pw.requestFullscreen().catch(() => {});
+    else document.querySelector(".player-wrap").requestFullscreen().catch(() => {});
   }
 });
-
-document.getElementById('modal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('modal')) closeModal();
-});
-
-document.getElementById('search').addEventListener('input', (e) => renderCards(e.target.value));
-
-let _appStarted = false;
-function startApp() {
-  if (_appStarted) return;
-  _appStarted = true;
-  renderCards('');
-}
 </script>
 </body>
 </html>
